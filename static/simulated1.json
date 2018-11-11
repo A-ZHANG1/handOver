@@ -1,0 +1,20 @@
+{
+  "results": {
+    "deviceStatus":[
+      {
+        "deviceID":"wjefndksnfksj",
+        "status":"待用",
+        "teacherID":"12"
+      },{
+        "deviceID":"kwseihfgksj",
+        "status":"待用",
+        "teacherID":"12"
+      },{
+        "deviceID":"jksldhgweku",
+        "status":"待用",
+        "teacherID":"12"
+      }
+
+    ]
+  }
+}
