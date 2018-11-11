@@ -1,5 +1,6 @@
 import Vue from 'vue'
 
+import BaiduMap from 'vue-baidu-map'
 import Cookies from 'js-cookie'
 
 import axios from 'axios'
@@ -28,6 +29,11 @@ Vue.use(ElementUI, {
   size: Cookies.get('size') || 'medium'// set element-ui default size
   ,locale
   // i18n: (key, value) => i18n.t(key, value)
+})
+
+Vue.use(BaiduMap, {
+  // ak 是在百度地图开发者平台申请的密钥 详见 http://lbsyun.baidu.com/apiconsole/key */
+  ak: 'K73Dbc6A1dKd3dLI0ikN5p83u5rKnGmy'
 })
 
 // register global utility filters.

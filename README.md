@@ -1,4 +1,4 @@
-#Wristband-UI
+#handOver-UI
 ---
 # 技术栈
 
@@ -8,3 +8,4 @@
 - element-ui _饿了么基于vue2开发组件库，本例使用了其中的datePicker_
 - echarts _一款丰富的图表库_
 - webpack、ES6、Babel、Stylus...
+- vue-baidu-map (doc: https://dafrok.github.io/vue-baidu-map/#/zh/context-menu/menu)
