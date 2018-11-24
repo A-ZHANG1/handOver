@@ -1,5 +1,6 @@
 import { login, logout, getInfo } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
+import { Ajax } from '../../utils/myAjax'
 
 const user = {
   state: {
@@ -28,15 +29,32 @@ const user = {
     // 登录
     Login({ commit }, userInfo) {
       const username = userInfo.username.trim()
+      const password = userInfo.password
       return new Promise((resolve, reject) => {
-        login(username, userInfo.password).then(response => {
-          const data = response.data
-          setToken(data.token)
-          commit('SET_TOKEN', data.token)
+        const url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/User/?User.phone_num=' + username
+        Ajax.get(url, function(data) {
+          const ajaxData = JSON.parse(data)
+          if (!ajaxData['User'] || ajaxData['User'].length < 1) {
+            alert('用户名或密码错误')
+          } else {
+            const user2login = ajaxData['User'][0]
+            if (user2login['passwd'] !== password) {
+              alert('用户名或密码错误')
+            } else {
+              setToken('admin')
+              commit('SET_TOKEN', 'admin')
+            }
+          }
           resolve()
-        }).catch(error => {
-          reject(error)
         })
+        // login(username, userInfo.password).then(response => {
+        //   const data = response.data
+        //   setToken(data.token)
+        //   commit('SET_TOKEN', data.token)
+        //   resolve()
+        // }).catch(error => {
+        //   reject(error)
+        // })
       })
     },
 
