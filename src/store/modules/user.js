@@ -30,7 +30,27 @@ const user = {
     Login({ commit }, userInfo) {
       const username = userInfo.username.trim()
       const password = userInfo.password
-      return new Promise((resolve, reject) => {
+      // return new Promise((resolve, reject) => {
+      //   const url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/User/?User.phone_num=' + username
+      //   Ajax.get(url, function(data) {
+      //     const ajaxData = JSON.parse(data)
+      //     if (!ajaxData['User'] || ajaxData['User'].length < 1) {
+      //       alert('用户名或密码错误')
+      //     } else {
+      //       const user2login = ajaxData['User'][0]
+      //       if (user2login['passwd'] !== password) {
+      //         alert('用户名或密码错误')
+      //       } else {
+      //         setToken('admin')
+      //         commit('SET_TOKEN', 'admin')
+      //       }
+      //     }
+      //     resolve()
+      //   })
+
+      // })
+
+           return new Promise((resolve, reject) => {
         const url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/User/?User.phone_num=' + username
         Ajax.get(url, function(data) {
           const ajaxData = JSON.parse(data)
@@ -41,21 +61,23 @@ const user = {
             if (user2login['passwd'] !== password) {
               alert('用户名或密码错误')
             } else {
-              setToken('admin')
-              commit('SET_TOKEN', 'admin')
+              if(user2login['user_type']=='owner'){
+                setToken('admin')
+                commit('SET_TOKEN', 'admin')
+              }else{
+                setToken('editor')
+                commit('SET_TOKEN', 'editor')
+              }
+              
             }
           }
           resolve()
         })
-        // login(username, userInfo.password).then(response => {
-        //   const data = response.data
-        //   setToken(data.token)
-        //   commit('SET_TOKEN', data.token)
-        //   resolve()
-        // }).catch(error => {
-        //   reject(error)
-        // })
-      })
+      }).catch(error => {
+          reject(error)
+        })
+      console.log(user2login['passwd'])
+       console.log("login")
     },
 
     // 获取用户信息
@@ -104,7 +126,7 @@ const user = {
       return new Promise(resolve => {
         commit('SET_TOKEN', role)
         setToken(role)
-        getUserInfo(role).then(response => {
+        getInfo(role).then(response => {
           const data = response.data
           commit('SET_ROLES', data.roles)
           commit('SET_NAME', data.name)
