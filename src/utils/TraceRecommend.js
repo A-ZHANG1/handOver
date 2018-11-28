@@ -7,7 +7,13 @@ var startPointDistance = []
 var endPoint = null
 var endPointDistance = []
 
-const SAMPLE_NUM = 100
+const SAMPLE_NUM = 1000
+const SAMPLE_DEL = 0.5
+const SAMPLE_SAVE = 0.1
+const HYBRID_SIZE = 200
+const VARIATE_SIZE = 200
+const ITERATION_MAX = 20
+const BESTKEEPS_MAX = 10
 
 function traceRecommendTest() {
   startPoint = { lat: -1, lon: 0 }
@@ -53,13 +59,13 @@ function geneEqual(a, b) {
 }
 
 function initializeGeneList() {
-  for (let i = 1; i < SAMPLE_NUM; i++) {
+  for (let i = 0; i < SAMPLE_NUM; i++) {
     const tempTraceList = []
-    for (let j = 1; j < traceList.length; j++) {
+    for (let j = 0; j < traceList.length; j++) {
       tempTraceList.push(j)
     }
     const gene = getGene()
-    for (let j = 1; j < traceList.length; j++) {
+    for (let j = 0; j < traceList.length; j++) {
       const pos = Math.floor(Math.random() * tempTraceList.length)
       gene.trace.push(tempTraceList[pos])
       tempTraceList.splice(pos, 1)
@@ -99,6 +105,13 @@ function removeBadGenes() {
       geneList.splice(i, 1)
     }
   }
+  // 随机删除部分数据
+  const sampleSave = Math.floor(SAMPLE_SAVE * geneList.length)
+  for (let i = geneList.length - 1; i > sampleSave; i--) {
+    if (Math.random() < SAMPLE_DEL) {
+      geneList.splice(i, 1)
+    }
+  }
   return
 }
 
@@ -106,6 +119,7 @@ function getBestGene() {
   geneList.sort(function(a, b) {
     return a.fitness - b.fitness
   })
+  if (bestGene && bestGene.fitness < geneList[0].fitness) return bestGene
   return JSON.parse(JSON.stringify(geneList[0]))
 }
 
@@ -132,10 +146,69 @@ function natureSelect() {
   geneList = newGeneList
   return
 }
+
+function fixGene(gene, start, size) {
+  const appearFlags = []
+  const doubleFlags = []
+  const candidateList = []
+  for (let i = 0; i < gene.trace.length; i++) {
+    appearFlags.push(false)
+    doubleFlags.push(false)
+  }
+  for (let i = 0; i < gene.trace.length; i++) {
+    if (appearFlags[gene.trace[i]]) doubleFlags[gene.trace[i]] = true
+    appearFlags[gene.trace[i]] = true
+  }
+  for (let i = 0; i < appearFlags.length; i++) {
+    if (!appearFlags[i]) candidateList.push(i)
+  }
+  for (let i = 0; i < gene.trace.length; i++) {
+    if (doubleFlags[gene.trace[i]] && (i < start || i >= start + size)) {
+      const pos = Math.floor(Math.random() * candidateList.length)
+      gene.trace[i] = candidateList[pos]
+      candidateList.splice(pos, 1)
+    }
+  }
+}
+
 function hybridize() {
+  const size = geneList.length
+  if (size === 0) return
+  const length = geneList[0].trace.length
+  for (let i = 0; i < HYBRID_SIZE; i++) {
+    const posA = Math.floor(Math.random() * size)
+    let posB = Math.floor(Math.random() * size)
+    posB = (posA === posB) ? (posB + 1) % size : posB
+    const geneA = geneList[posA]
+    const geneB = geneList[posB]
+    let hybridizeSize = Math.floor(Math.random() * length * 0.5 + 1)
+    hybridizeSize = Math.max(1, Math.min(hybridizeSize, length / 2))
+    const hybridizePos = Math.floor(Math.random() * (length - hybridizeSize + 1))
+    for (let j = 0; j < hybridizeSize; j++) {
+      const p = hybridizePos + j
+      const temp = geneA.trace[p]
+      geneA.trace[p] = geneB.trace[p]
+      geneB.trace[p] = temp
+    }
+    fixGene(geneA, hybridizePos, hybridizeSize)
+    fixGene(geneB, hybridizePos, hybridizeSize)
+  }
   return
 }
+
 function variate() {
+  const size = geneList.length
+  if (size === 0) return
+  const length = geneList[0].trace.length
+  for (let i = 0; i < VARIATE_SIZE; i++) {
+    const pos = Math.floor(Math.random() * size)
+    const pA = Math.floor(Math.random() * length)
+    let pB = Math.floor(Math.random() * length)
+    pB = (pA === pB) ? (pB + 1) % length : pB
+    const temp = geneList[pos].trace[pA]
+    geneList[pos].trace[pA] = geneList[pos].trace[pB]
+    geneList[pos].trace[pB] = temp
+  }
   return
 }
 
@@ -144,13 +217,16 @@ export function traceRecommend() {
   calculateFitness()
   removeBadGenes()
   bestGene = getBestGene()
-  for (var i = 0; checkEndCondition(); i++) {
+  for (let i = 0, bestKeeps = 0; i < ITERATION_MAX || bestKeeps < BESTKEEPS_MAX || checkEndCondition(); i++) {
     natureSelect()
     hybridize()
     variate()
     calculateFitness()
-    let lastBestGene = bestGene
+    removeBadGenes()
+    const lastBestGene = bestGene
     bestGene = getBestGene()
+    if (geneEqual(bestGene, lastBestGene)) bestKeeps++
+    else bestKeeps = 0
   }
   return bestGene
 }
