@@ -19,13 +19,25 @@ function traceRecommendTest() {
   startPoint = { lat: -1, lon: 0 }
   endPoint = { lat: 6, lon: 9 }
   traceList.push({ lat: 0, lon: 0 })
+  traceList.push({ lat: 0.5, lon: 0 })
   traceList.push({ lat: 1, lon: 0 })
+  traceList.push({ lat: 1.5, lon: 0 })
+  traceList.push({ lat: 2, lon: 0 })
+  traceList.push({ lat: 2.5, lon: 0 })
   traceList.push({ lat: 3, lon: 0 })
+  traceList.push({ lat: 3.75, lon: 1 })
   traceList.push({ lat: 4.5, lon: 2 })
+  traceList.push({ lat: 5.25, lon: 3 })
   traceList.push({ lat: 6, lon: 4 })
+  traceList.push({ lat: 6, lon: 4.5 })
   traceList.push({ lat: 6, lon: 5 })
+  traceList.push({ lat: 6, lon: 5.5 })
   traceList.push({ lat: 6, lon: 6 })
+  traceList.push({ lat: 6, lon: 6.5 })
+  traceList.push({ lat: 6, lon: 7 })
+  traceList.push({ lat: 6, lon: 7.5 })
   traceList.push({ lat: 6, lon: 8 })
+  traceList.push({ lat: 6, lon: 8.5 })
   for (let i = 0; i < traceList.length; i++) {
     if (startPoint) {
       startPointDistance.push(Math.sqrt(Math.pow(traceList[i].lat - startPoint.lat, 2) + Math.pow(traceList[i].lon - startPoint.lon, 2)))
@@ -186,9 +198,11 @@ function hybridize() {
     const hybridizePos = Math.floor(Math.random() * (length - hybridizeSize + 1))
     for (let j = 0; j < hybridizeSize; j++) {
       const p = hybridizePos + j
-      const temp = geneA.trace[p]
-      geneA.trace[p] = geneB.trace[p]
-      geneB.trace[p] = temp
+      if (p < length) {
+        const temp = geneA.trace[p]
+        geneA.trace[p] = geneB.trace[p]
+        geneB.trace[p] = temp
+      }
     }
     fixGene(geneA, hybridizePos, hybridizeSize)
     fixGene(geneB, hybridizePos, hybridizeSize)
