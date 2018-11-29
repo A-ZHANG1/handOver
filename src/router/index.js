@@ -71,6 +71,25 @@ export const constantRouterMap = [
       }
   ]
 },
+ // {
+ //  path: '/mapsearch',
+ //  component: Layout,
+ //  redirect: '/mapsearch',
+ //  name: 'mapsearch',
+ //  meta: {
+ //    title: 'mapsearch',
+ //    icon: 'excel',
+ //    roles: ['admin']
+ //  },
+//    children: [
+//       {
+//         path: 'mapsearch',
+//         component: () => import('@/views/dashboard/admin/mapsearch'),
+//         name: 'mapsearch',
+//         meta: { title: '地图',roles: ['admin'] }
+//       }
+//   ]
+// },
   {
   path: '/table',
   component: Layout,
