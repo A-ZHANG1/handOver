@@ -22,9 +22,9 @@ import Layout from '../views/layout/Layout'
   }
 **/
 export const constantRouterMap = [
-  { path: '/login', 
+  { path: '/login',
   component: () => import('@/views/login/index'),
-  meta: { title: 'login', 
+  meta: { title: 'login',
   icon: 'example' },},
   { path: '/404', component: () => import('@/views/404'), hidden: true },
 
@@ -162,7 +162,7 @@ export const constantRouterMap = [
       }
     ]
   },
-{
+  {
     path: 'external-link',
     component: Layout,
     children: [
@@ -171,6 +171,29 @@ export const constantRouterMap = [
         meta: { title: '学院首页', icon: 'link' }
       }
     ]
+  },
+  {
+    path: '/userCentre',
+    component: Layout,
+    redirect: '/userCentre',
+    name: 'userCentre',
+    children: [{
+      path: '/userCentre',
+      component: () => import('@/views/userCentre/index'),
+      meta: { title: '个人中心', icon: 'user', roles: ['admin'] }
+    }]
+  },
+  {
+    path: '/userCentre/task/:task_uid',
+    component: Layout,
+    redirect: '/userCentre/task/:task_uid',
+    name: '/userCentre/task',
+    children: [{
+      path: '/userCentre/task/:task_uid',
+      component: () => import('@/views/userCentre/task'),
+      meta: { title: '订单详情', roles: ['admin'] }
+    }],
+    hidden: true
   },
 
   { path: '*', redirect: '/404', hidden: true }
@@ -215,7 +238,7 @@ export const asyncRouterMap = [
     ]
   },
 
-  
+
   {
     path: 'external-link',
     component: Layout,
