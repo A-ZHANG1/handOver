@@ -7,23 +7,32 @@
 -->
 <template>
   <div style="padding-top:50px; border:0px solid red">
-   <!--  <Modal @on-cancel="cancel" v-model="showMapComponent" width="800" :closable="false" :mask-closable="false"> -->
-<!-- <modal v-model="showMapComponent"> -->
 <el-tabs type="border-card" v-model="showMapComponent">
   <!-- 采购tab -->
   <el-tab-pane label="采购任务">
     <el-form ref="form" :model="form" label-width="120px">
       <el-form-item label="商品名">
-        <el-input v-model="form.productName"/>
+        <el-col :span=12>
+          <el-input type="textarea" v-model="form.productName" placeholder="请输入商品名称及特殊要求，如：全家桶一个"/>
+        </el-col>
+      </el-form-item>
+      <el-form-item label="预估费用">
+        <el-col :span=12>
+          <el-input v-model="form.taskPrice" placeholder="不超过500元"/>
+      </el-col>
       </el-form-item>
       <el-form-item label="悬赏金">
-        <el-input v-model="form.reward"/>
+        <el-col :span=12>
+          <el-input v-model="form.reward"/>
+      </el-col>
       </el-form-item>
       <el-form-item label="收件人姓名">
-        <el-input v-model="form.receiverName"/>
+        <el-col :span=12>
+          <el-input v-model="form.receiverName"/>
+        </el-col>
       </el-form-item>
       <el-form-item label="收件地址">
-
+        <el-col :span=12>
       <baidu-map v-bind:style="mapStyle" class="bm-view" ak="K73Dbc6A1dKd3dLI0ikN5p83u5rKnGmy"
       :center="center" 
       :zoom="zoom" 
@@ -45,19 +54,25 @@
         <bm-point-collection :points="position" shape="BMAP_POINT_SHAPE_STAR" color="red" size="BMAP_POINT_SIZE_SMALL" @click="showPostManInfo"></bm-point-collection>
         <!-- <bm-marker v-for="marker of position" :position="{lng: marker.lng, lat: marker.lat}"></bm-marker> -->
       {{position}}
+      {{keyword}}
       </baidu-map>
+    </el-col>
        </el-form-item>
 
        <el-form-item>   
-        <el-button type="primary" @click="showRecommendedPostman">查看周边递客</el-button>     
+        <el-col :span=12>
+          <el-button type="primary" @click="showRecommendedPostman">查看周边递客</el-button>   
+        </el-col>  
         </el-form-item>
      
       <el-form-item label="备注">
-        <el-input v-model="form.desc" type="textarea"/>
+        <el-col :span=12>
+          <el-input v-model="form.desc" type="textarea"/>
+      </el-col>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit">Create</el-button>
-        <el-button @click="onCancel">Cancel</el-button>
+        <el-button type="primary" @click="onSubmit">发布</el-button>
+        <el-button @click="onCancel">取消</el-button>
       </el-form-item>
     </el-form>
   </el-tab-pane>
@@ -68,8 +83,6 @@
   </el-tab-pane>
 </el-tabs>
 
-      
-    <!-- </Modal> -->
   </div>  
 </template>
 <script>
