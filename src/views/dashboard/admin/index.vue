@@ -2,12 +2,14 @@
 使用说明:
    v-on:  map-confirm,参数为array数组,传递经纬度值
    v-on   cancel    取消时发出事件
+   showMapComponent: 单击时显示地址详情弹框
+   :position 设置在data return 中监听改变
 -->
 <template>
   <div style="padding-top:50px; border:0px solid red">
-    <Modal @on-cancel="cancel" v-model="showMapComponent" width="800" :closable="false" :mask-closable="false">
-
-<el-tabs type="border-card">
+   <!--  <Modal @on-cancel="cancel" v-model="showMapComponent" width="800" :closable="false" :mask-closable="false"> -->
+<!-- <modal v-model="showMapComponent"> -->
+<el-tabs type="border-card" v-model="showMapComponent">
   <!-- 采购tab -->
   <el-tab-pane label="采购任务">
     <el-form ref="form" :model="form" label-width="120px">
@@ -39,12 +41,15 @@
           </bm-auto-complete>
         </bm-control>
         <bm-local-search :keyword="keyword" :auto-viewport="true" style="width:0px;height:0px;overflow: hidden;"></bm-local-search>
-        <bm-marker :position="postionMap" />
+
+        <bm-point-collection :points="position" shape="BMAP_POINT_SHAPE_STAR" color="red" size="BMAP_POINT_SIZE_SMALL" @click="showPostManInfo"></bm-point-collection>
+        <!-- <bm-marker v-for="marker of position" :position="{lng: marker.lng, lat: marker.lat}"></bm-marker> -->
+      {{position}}
       </baidu-map>
        </el-form-item>
 
        <el-form-item>   
-        <el-button type="primary" @click="confirm">查看周边递客</el-button>     
+        <el-button type="primary" @click="showRecommendedPostman">查看周边递客</el-button>     
         </el-form-item>
      
       <el-form-item label="备注">
@@ -64,11 +69,14 @@
 </el-tabs>
 
       
-    </Modal>
+    <!-- </Modal> -->
   </div>  
 </template>
 <script>
-  import {BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker} from 'vue-baidu-map'
+  import {BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker,BmPointCollection} from 'vue-baidu-map'
+
+// const position=[{lng: 121.443, lat:31.032},{lng: 122, lat:28}]
+
   export default {
     components: {
       BaiduMap,
@@ -76,7 +84,8 @@
       BmView,
       BmAutoComplete,
       BmLocalSearch,
-      BmMarker
+      BmMarker,
+      BmPointCollection
     },
     data: function () {
       return {
@@ -95,7 +104,8 @@
             receiverName: '',
             keyword: '',
             note: ''
-         }
+         },
+         position:[],
       }
     },
     watch: {
@@ -113,14 +123,25 @@
         default: 500
       }
     },
+    created(){
+      // this.setPositions()
+    },
+    mounted(){
+        // this.setPositions()
+    },
     methods: {
+      setPositions(){
+          this.position=[{lng: 121.443, lat:31.032},{lng: 121.447, lat:31.032433}]
+      },
       /***
        * 地图点击事件。
        */
       getClickInfo (e) {
         this.center.lng = e.point.lng
         this.center.lat = e.point.lat
-        alert( e.point.lng)
+        alert(e.point.lng)
+        alert(e.point.lat)
+     
       },
       syncCenterAndZoom (e) {
         const {lng, lat} = e.target.getCenter()
@@ -129,20 +150,24 @@
         this.zoom = e.target.getZoom()
       },
       /***
-       * 确认
+       * 查看周边递客
        */
-      confirm: function () {
-        this.showMapComponent = false
-        alert("您有要优先选择的递客吗")
-        this.$emit('map-confirm', this.center)
+      showRecommendedPostman() {
+        
+        this.setPositions()
 
       },
       /***
-       * 取消
+       * 单击时查看递客详情及是否选定确认按钮
        */
-      cancel: function () {
-        this.showMapComponent = false
-        this.$emit('cancel', this.showMapComponent)
+      showPostManInfo(){
+
+      },
+      /***
+       * 表单提交事件
+       */
+      onSubmit(){
+        console.log(this.position)
       }
     }
   }
