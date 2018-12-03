@@ -3,14 +3,14 @@
     <Modal>
       <el-tabs type="border-card">
         <el-tab-pane label="基本信息">
-          <label>订单号：</label>{{ myTask.id }}<br>
-          <label>商品总价：</label>{{ myTask.total_price }}<br>
-          <label>递送费：</label>{{ myTask.express_fee }}<br>
-          <label>当前状态：</label>{{ myTask.current_state }}<br>
-          <label>订单类型：</label>{{ myTask.task_type }}<br>
-          <label>描述：</label>{{ myTask.task_des }}<br>
-          <label v-if="postman">快递员：</label>{{ postman.user_name }}<br>
-          <label>评价：</label>{{ myTask.task_comment }}<br>
+          <el-row><label>订单号：</label>{{ myTask.id }}</el-row>
+          <el-row><label>商品总价：</label>{{ myTask.total_price }}</el-row>
+          <el-row><label>递送费：</label>{{ myTask.express_fee }}</el-row>
+          <el-row><label>当前状态：</label>{{ myTask.current_state }}</el-row>
+          <el-row><label>订单类型：</label>{{ myTask.task_type }}</el-row>
+          <el-row><label>描述：</label>{{ myTask.task_des }}</el-row>
+          <el-row v-if="postman"><label>快递员：</label>{{ postman.user_name }}</el-row>
+          <el-row><label>评价：</label>{{ myTask.task_comment }}</el-row>
         </el-tab-pane>
 
         <el-tab-pane label="物品列表">
@@ -29,7 +29,7 @@
           </el-table>
         </el-tab-pane>
 
-        <el-tab-pane label="收货信息">
+        <el-tab-pane v-if="receiver" label="收货信息">
           <label>收件人：</label>{{ receiver.receiver_name }}<br>
           <label>收件地址：</label>{{ receiver.receiver_address.title }} &nbsp; {{ receiver.receiver_address.detail }}<br>
           <label>联系电话：</label>{{ receiver.receiver_phone }}<br>
@@ -42,7 +42,7 @@
           <label>订单号：</label>{{ payment.order_num }}<br>
         </el-tab-pane>
 
-        <el-tab-pane label="路径记录">
+        <el-tab-pane v-if="traces.length > 0" label="路径记录">
           <el-table :data="traces">
             <el-table-column prop="trace_time" label="时间"/>
             <el-table-column label="经度">
@@ -57,16 +57,48 @@
             </el-table-column>
           </el-table>
         </el-tab-pane>
+
+        <el-tab-pane v-if="traces.length > 0" label="地图">
+          <baidu-map v-bind:style="mapStyle"
+                     :center="center"
+                     :zoom="zoom"
+                     :scroll-wheel-zoom="true"
+                     class="bm-view"
+                     ak="K73Dbc6A1dKd3dLI0ikN5p83u5rKnGmy">
+            <bm-view style="width: 100%; height:500px;"/>
+            <bm-marker :position="receiver.receiver_address" animation="BMAP_ANIMATION_BOUNCE"/>
+            <bm-point-collection :points="items_pos" shape="BMAP_POINT_SHAPE_CIRCLE" color="red" size="BMAP_POINT_SIZE_BIGGER"/>
+            <bm-polyline :path="traces_pos" :editing="true"/>
+          </baidu-map>
+        </el-tab-pane>
       </el-tabs>
 
     </Modal>
   </div>
 </template>
 <script>
+import { BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker, BmPointCollection } from 'vue-baidu-map'
 
 export default {
+  components: {
+    BaiduMap,
+    BmControl,
+    BmView,
+    BmAutoComplete,
+    BmLocalSearch,
+    BmMarker,
+    BmPointCollection
+  },
   data: function() {
     return {
+      mapStyle: {
+        width: '100%',
+        height: this.mapHeight + 'px'
+      },
+      center: { lng: 121.443, lat: 31.032 },
+      zoom: 15,
+      traces_pos: [],
+      items_pos: [],
       myTask: null,
       receiver: null,
       items: [],
@@ -87,25 +119,34 @@ export default {
   },
   methods: {
     handleData() {
-      let url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Item/?_task_id=' + this.$route.params.task_uid
+      let url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Item/?Item._task_uid=' + this.$route.params.task_uid
       this.$axios.get(url).then(res => {
         if (res.data['Item']) {
           this.items = res.data['Item']
-          this.items.forEach(function(item) {
+          this.items_pos = []
+          for (const i in this.items) {
+            const item = this.items[i]
             item.item_address = JSON.parse(item.item_address)
-          })
+            this.items_pos.push(item.item_address)
+          }
         }
       })
-      url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Trace/?_task_id=' + this.$route.params.task_uid
+      url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Trace/?Trace._task_uid=' + this.$route.params.task_uid
       this.$axios.get(url).then(res => {
         if (res.data['Trace']) {
           this.traces = res.data['Trace']
-          this.traces.forEach(function(trace) {
-            trace.trace_pos = JSON.parse(trace.trace_pos)
+          this.traces_pos = []
+          this.traces.sort(function(a, b) {
+            return a.trace_time.localeCompare(b.trace_time)
           })
+          for (const i in this.traces) {
+            const trace = this.traces[i]
+            trace.trace_pos = JSON.parse(trace.trace_pos)
+            this.traces_pos.push(trace.trace_pos)
+          }
         }
       })
-      url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Payment/?_task_id=' + this.$route.params.task_uid
+      url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Payment/?Payment._task_uid=' + this.$route.params.task_uid
       this.$axios.get(url).then(res => {
         if (res.data['Payment']) {
           this.payment = res.data['Payment'][0]
