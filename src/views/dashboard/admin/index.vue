@@ -18,12 +18,12 @@
       </el-form-item>
       <el-form-item label="预估费用">
         <el-col :span=12>
-          <el-input v-model="form.taskPrice" placeholder="不超过500元"/>
+          <el-input v-model.number="form.taskPrice" placeholder="不超过500元" type="number"/>
       </el-col>
       </el-form-item>
       <el-form-item label="悬赏金" placeholder="加入悬赏金抢单更快噢">
         <el-col :span=12>
-          <el-input v-model="form.reward"/>
+          <el-input v-model.number="form.reward"/>
       </el-col>
       </el-form-item>
       <el-form-item label="收件人姓名">
@@ -67,7 +67,7 @@
      
       <el-form-item label="备注">
         <el-col :span=12>
-          <el-input v-model="form.desc" type="textarea"/>
+          <el-input v-model="form.note" type="textarea"/>
       </el-col>
       </el-form-item>
       <el-form-item>
@@ -104,20 +104,26 @@
     data: function () {
       return {
         showMapComponent: this.value,
-        keyword: '',
+        keyword: '软件学院',
         mapStyle: {
           width: '100%',
           height: this.mapHeight + 'px'
         },
-        // 121.443287,31.03201
         center: {lng: 121.443, lat:31.032},
         zoom: 15,
+        // form: {
+        //     productName: '',
+        //     taskPrice:'',
+        //     reward: '',
+        //     receiverName: '',
+        //     note: ''
+        //  },
         form: {
-            productName: '',
-            reward: '',
-            receiverName: '',
-            keyword: '',
-            note: ''
+            productName: '电脑',
+            taskPrice:'100',
+            reward: '5',
+            receiverName: '张三',
+            note: '随手1'
          },
          position:[],
       }
@@ -179,11 +185,45 @@
       showPostManInfo(){
 
       },
+      theReplacer(key, value) {
+        if(key=== "total_price"){return +value}
+        else if(key==="express_fee"){return +value}
+        else{return value}
+         // return key === "total_price" ? +value : value;
+      },
       /***
        * 表单提交事件
        */
       onSubmit(){
-        
+        let ownerUID=getUserId()
+        let newTask={
+                  total_price:this.form.taskPrice,
+                  express_fee:this.form.reward,
+                  current_state:"released",
+                  task_type:"purchase",
+                  task_des:this.keyword,
+                  task_comment:this.note,
+                  _owner_uid:ownerUID
+                }
+
+
+     // console.log(JSON.stringify(newTask,this.theReplacer));           
+        this.$axios(
+              {
+                url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task', 
+                method:"post",
+                data:JSON.stringify(newTask,this.theReplacer),
+                headers:{
+                  'Content-Type':'application/json'
+                }
+              })
+              .then(function (response) {
+              console.log(response);
+              console.log("posted");
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
       }
     }
   }
