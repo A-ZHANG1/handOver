@@ -55,6 +55,7 @@
   </div>
 </template>
 <script>
+import { getUserId } from '../../utils/auth'
 
 export default {
   data: function() {
@@ -76,7 +77,7 @@ export default {
   },
   methods: {
     handleData() {
-      const url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task'
+      const url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task?Task._owner_uid=' + getUserId()
       this.$axios.get(url).then(res => {
         if (res.data['Task']) {
           this.myTasks = res.data['Task']
