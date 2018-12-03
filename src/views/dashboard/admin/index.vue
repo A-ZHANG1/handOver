@@ -8,8 +8,8 @@
 <template>
   <div style="padding-top:50px; border:0px solid red">
 <el-tabs type="border-card" v-model="showMapComponent">
-  <!-- 采购tab -->
-  <el-tab-pane label="采购任务">
+  <!-- 采购任务tab -->
+  <el-tab-pane label="代购">
     <el-form ref="form" :model="form" label-width="120px">
       <el-form-item label="商品名">
         <el-col :span=12>
@@ -21,7 +21,7 @@
           <el-input v-model="form.taskPrice" placeholder="不超过500元"/>
       </el-col>
       </el-form-item>
-      <el-form-item label="悬赏金">
+      <el-form-item label="悬赏金" placeholder="加入悬赏金抢单更快噢">
         <el-col :span=12>
           <el-input v-model="form.reward"/>
       </el-col>
@@ -76,8 +76,8 @@
       </el-form-item>
     </el-form>
   </el-tab-pane>
-  <!-- 配送tab -->
-  <el-tab-pane label="配送任务">
+  <!-- 配送任务tab -->
+  <el-tab-pane label="跑腿">
     
 
   </el-tab-pane>
@@ -87,6 +87,7 @@
 </template>
 <script>
   import {BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker,BmPointCollection} from 'vue-baidu-map'
+  import { getUserId } from '@/utils/auth'
 
 // const position=[{lng: 121.443, lat:31.032},{lng: 122, lat:28}]
 
@@ -141,6 +142,8 @@
     },
     mounted(){
         // this.setPositions()
+        console.log(getUserId())
+        console.log("mounted")
     },
     methods: {
       setPositions(){
@@ -152,8 +155,8 @@
       getClickInfo (e) {
         this.center.lng = e.point.lng
         this.center.lat = e.point.lat
-        alert(e.point.lng)
-        alert(e.point.lat)
+        // alert(e.point.lng)
+        // alert(e.point.lat)
      
       },
       syncCenterAndZoom (e) {
@@ -180,7 +183,7 @@
        * 表单提交事件
        */
       onSubmit(){
-        console.log(this.position)
+        
       }
     }
   }

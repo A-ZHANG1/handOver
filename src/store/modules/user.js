@@ -1,5 +1,5 @@
 import { login, logout, getInfo } from '@/api/login'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { getToken, setToken, removeToken,setUserId,removeUserId,getUserId } from '@/utils/auth'
 import { Ajax } from '../../utils/myAjax'
 
 const user = {
@@ -61,8 +61,11 @@ const user = {
             if (user2login['passwd'] !== password) {
               alert('用户名或密码错误')
             } else {
+
+              setUserId(user2login['id'])
+
               if(user2login['user_type']=='owner'){
-                setToken('admin')
+                setToken('admin')     
                 commit('SET_TOKEN', 'admin')
               }else{
                 setToken('editor')
@@ -76,8 +79,9 @@ const user = {
       }).catch(error => {
           reject(error)
         })
-      console.log(user2login['passwd'])
-       console.log("login")
+      // console.log(user2login['passwd'])
+       // console.log("login")
+       
     },
 
     // 获取用户信息
