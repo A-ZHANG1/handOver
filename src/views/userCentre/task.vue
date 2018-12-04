@@ -192,91 +192,34 @@ export default {
       })
     },
     cancelTask() {
-      this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid).then(res => {
-        if (res.data['id'] && res.data.current_state === 'released') {
-          const currentTask = res.data
-          currentTask.current_state = 'cancelled'
-          const url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid
-          this.$axios.put(url, currentTask).then(res => {
-            this.handleData()
-          })
-        } else {
-          alert('当前状态无法直接取消订单')
-          this.handleData()
-        }
-      })
+      this.changeTaskState('released', 'cancelled', '当前状态无法直接取消订单')
     },
     cancelTaskO() {
-      this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid).then(res => {
-        if (res.data['id'] && res.data.current_state === 'accepted') {
-          const currentTask = res.data
-          currentTask.current_state = 'cancelledO'
-          const url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid
-          this.$axios.put(url, currentTask).then(res => {
-            this.handleData()
-          })
-        } else {
-          alert('当前状态无法提出取消订单')
-          this.handleData()
-        }
-      })
+      this.changeTaskState('accepted', 'cancelledO', '当前状态无法提出取消订单')
     },
     cancelTaskOP() {
-      this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid).then(res => {
-        if (res.data['id'] && res.data.current_state === 'cancelledP') {
-          const currentTask = res.data
-          currentTask.current_state = 'cancelledOP'
-          const url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid
-          this.$axios.put(url, currentTask).then(res => {
-            this.handleData()
-          })
-        } else {
-          alert('当前状态无法接受取消订单')
-          this.handleData()
-        }
-      })
+      this.changeTaskState('cancelledP', 'cancelledOP', '当前状态无法接受取消订单')
     },
     cancelTaskRefuse() {
-      this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid).then(res => {
-        if (res.data['id'] && res.data.current_state === 'cancelledP') {
-          const currentTask = res.data
-          currentTask.current_state = 'accepted'
-          const url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid
-          this.$axios.put(url, currentTask).then(res => {
-            this.handleData()
-          })
-        } else {
-          alert('当前状态无法拒绝取消订单')
-          this.handleData()
-        }
-      })
+      this.changeTaskState('cancelledP', 'accepted', '当前状态无法拒绝取消订单')
     },
     signTask() {
-      this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid).then(res => {
-        if (res.data['id'] && res.data.current_state === 'received') {
-          const currentTask = res.data
-          currentTask.current_state = 'signed'
-          const url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid
-          this.$axios.put(url, currentTask).then(res => {
-            this.handleData()
-          })
-        } else {
-          alert('当前状态无法签收订单')
-          this.handleData()
-        }
-      })
+      this.changeTaskState('received', 'signed', '当前状态无法签收订单')
     },
     refuseTask() {
+      this.changeTaskState('received', 'refused', '当前状态无法拒收订单')
+    },
+    changeTaskState(originState, finalState, alertMessage) {
       this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid).then(res => {
-        if (res.data['id'] && res.data.current_state === 'received') {
+        if (res.data['id'] && res.data.current_state === originState) {
           const currentTask = res.data
-          currentTask.current_state = 'refused'
+          currentTask.current_state = finalState
           const url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid
           this.$axios.put(url, currentTask).then(res => {
             this.handleData()
           })
         } else {
-          alert('当前状态无法拒收订单')
+          alert(alertMessage)
           this.handleData()
         }
       })
