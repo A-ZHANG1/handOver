@@ -20,8 +20,8 @@
           <el-row><el-col :span="24"><label>订单号：</label>{{ myTask.id }}</el-col></el-row>
           <el-row><el-col :span="24"><label>商品总价：</label>{{ myTask.total_price }}</el-col></el-row>
           <el-row><el-col :span="24"><label>递送费：</label>{{ myTask.express_fee }}</el-col></el-row>
-          <el-row><el-col :span="24"><label>当前状态：</label>{{ myTask.current_state }}</el-col></el-row>
-          <el-row><el-col :span="24"><label>订单类型：</label>{{ myTask.task_type }}</el-col></el-row>
+          <el-row><el-col :span="24"><label>当前状态：</label>{{ translate(myTask.current_state) }}</el-col></el-row>
+          <el-row><el-col :span="24"><label>订单类型：</label>{{ translate(myTask.task_type) }}</el-col></el-row>
           <el-row><el-col :span="24"><label>描述：</label>{{ myTask.task_des }}</el-col></el-row>
           <el-row v-if="postman"><el-col :span="24"><label>快递员：</label>{{ postman.user_name }}</el-col></el-row>
           <el-row><el-col :span="24"><label>评价：</label>{{ myTask.task_comment }}</el-col></el-row>
@@ -52,7 +52,11 @@
                 {{ scope.row.item_address['detail'] }}
               </template>
             </el-table-column>
-            <el-table-column prop="item_state" label="状态"/>
+            <el-table-column label="状态">
+              <template slot-scope="scope">
+                {{ translate(scope.row.item_state) }}
+              </template>
+            </el-table-column>
             <el-table-column prop="item_des" label="描述"/>
             <el-table-column prop="item_image" label="图片"/>
           </el-table>
@@ -65,9 +69,9 @@
         </el-tab-pane>
 
         <el-tab-pane v-if="payment" label="支付信息">
-          <label>支付状态：</label>{{ payment.payment_state }}<br>
+          <label>支付状态：</label>{{ translate(payment.payment_state) }}<br>
           <label>支付金额：</label>{{ payment.payment_amount }}<br>
-          <label>支付方式：</label>{{ payment.payment_mode }}<br>
+          <label>支付方式：</label>{{ translate(payment.payment_mode) }}<br>
           <label>订单号：</label>{{ payment.order_num }}<br>
         </el-tab-pane>
 
@@ -93,6 +97,7 @@
 </template>
 <script>
 import { BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker, BmPointCollection } from 'vue-baidu-map'
+import { translateState } from '../../utils/translate'
 
 export default {
   components: {
@@ -190,6 +195,9 @@ export default {
           })
         }
       })
+    },
+    translate(state) {
+      return translateState(state)
     },
     cancelTask() {
       this.changeTaskState('released', 'cancelled', '当前状态无法直接取消订单')

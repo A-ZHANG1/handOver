@@ -11,8 +11,16 @@
             </el-table-column>
             <el-table-column prop="total_price" label="物品总价"/>
             <el-table-column prop="express_fee" label="递送费"/>
-            <el-table-column prop="current_state" label="订单状态"/>
-            <el-table-column prop="task_type" label="订单类型"/>
+            <el-table-column label="订单状态">
+              <template slot-scope="scope">
+                {{ translate(scope.row.current_state) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="订单类型">
+              <template slot-scope="scope">
+                {{ translate(scope.row.task_type) }}
+              </template>
+            </el-table-column>
             <el-table-column prop="task_des" label="描述"/>
             <el-table-column prop="task_comment" label="评价"/>
           </el-table>
@@ -27,8 +35,16 @@
             </el-table-column>
             <el-table-column prop="total_price" label="物品总价"/>
             <el-table-column prop="express_fee" label="递送费"/>
-            <el-table-column prop="current_state" label="订单状态"/>
-            <el-table-column prop="task_type" label="订单类型"/>
+            <el-table-column label="订单状态">
+              <template slot-scope="scope">
+                {{ translate(scope.row.current_state) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="订单类型">
+              <template slot-scope="scope">
+                {{ translate(scope.row.task_type) }}
+              </template>
+            </el-table-column>
             <el-table-column prop="task_des" label="描述"/>
             <el-table-column prop="task_comment" label="评价"/>
           </el-table>
@@ -43,8 +59,16 @@
             </el-table-column>
             <el-table-column prop="total_price" label="物品总价"/>
             <el-table-column prop="express_fee" label="递送费"/>
-            <el-table-column prop="current_state" label="订单状态"/>
-            <el-table-column prop="task_type" label="订单类型"/>
+            <el-table-column label="订单状态">
+              <template slot-scope="scope">
+                {{ translate(scope.row.current_state) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="订单类型">
+              <template slot-scope="scope">
+                {{ translate(scope.row.task_type) }}
+              </template>
+            </el-table-column>
             <el-table-column prop="task_des" label="描述"/>
             <el-table-column prop="task_comment" label="评价"/>
           </el-table>
@@ -56,6 +80,7 @@
 </template>
 <script>
 import { getUserId } from '../../utils/auth'
+import { translateState } from '../../utils/translate'
 
 export default {
   data: function() {
@@ -93,6 +118,9 @@ export default {
           }
         }
       })
+    },
+    translate(state) {
+      return translateState(state)
     }
   }
 }
