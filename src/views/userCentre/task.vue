@@ -11,35 +11,38 @@
                      class="bm-view"
                      ak="K73Dbc6A1dKd3dLI0ikN5p83u5rKnGmy">
             <bm-view style="width: 100%; height:300px;"/>
-            <bm-marker :position="receiver.receiver_address" animation="BMAP_ANIMATION_BOUNCE"/>
-            <bm-point-collection :points="items_pos" shape="BMAP_POINT_SHAPE_CIRCLE" color="red" size="BMAP_POINT_SIZE_BIGGER"/>
-            <bm-point-collection :points="start_pos" shape="BMAP_POINT_SHAPE_STAR" color="green" size="BMAP_POINT_SIZE_HUGE"/>
-            <bm-polyline :path="traces_pos" :editing="true"/>
+            <bm-marker :position="receiver.receiver_address" :title="receiver.receiver_address.title" animation="BMAP_ANIMATION_BOUNCE"/>
+            <bm-point-collection :points="itemsPos.on" shape="BMAP_POINT_SHAPE_CIRCLE" color="green" size="BMAP_POINT_SIZE_BIGGER"/>
+            <bm-point-collection :points="itemsPos.off" shape="BMAP_POINT_SHAPE_CIRCLE" color="red" size="BMAP_POINT_SIZE_BIGGER"/>
+            <bm-point-collection :points="startPos" shape="BMAP_POINT_SHAPE_STAR" color="teal" size="BMAP_POINT_SIZE_HUGE"/>
+            <bm-polyline :path="tracesPos"/>
           </baidu-map>
 
-          <el-row><el-col :span="24"><label>订单号：</label>{{ myTask.id }}</el-col></el-row>
-          <el-row><el-col :span="24"><label>商品总价：</label>{{ myTask.total_price }}</el-col></el-row>
-          <el-row><el-col :span="24"><label>递送费：</label>{{ myTask.express_fee }}</el-col></el-row>
-          <el-row><el-col :span="24"><label>当前状态：</label>{{ translate(myTask.current_state) }}</el-col></el-row>
-          <el-row><el-col :span="24"><label>订单类型：</label>{{ translate(myTask.task_type) }}</el-col></el-row>
-          <el-row><el-col :span="24"><label>描述：</label>{{ myTask.task_des }}</el-col></el-row>
-          <el-row v-if="postman"><el-col :span="24"><label>快递员：</label>{{ postman.user_name }}</el-col></el-row>
-          <el-row><el-col :span="24"><label>评价：</label>{{ myTask.task_comment }}</el-col></el-row>
+          <el-form label-width="120px">
+            <el-form-item label="订单号">{{ myTask.id }}</el-form-item>
+            <el-form-item label="商品总价">{{ myTask.total_price }}</el-form-item>
+            <el-form-item label="递送费">{{ myTask.express_fee }}</el-form-item>
+            <el-form-item label="当前状态">{{ translate(myTask.current_state) }}</el-form-item>
+            <el-form-item label="订单类型">{{ translate(myTask.task_type) }}</el-form-item>
+            <el-form-item label="描述">{{ myTask.task_des }}</el-form-item>
+          </el-form>
 
-          <el-button-group v-if="myTask.current_state === 'released'">
-            <el-button type="danger" icon="el-icon-close" @click="cancelTask">取消订单</el-button>
-          </el-button-group>
-          <el-button-group v-if="myTask.current_state === 'accepted'">
-            <el-button type="danger" icon="el-icon-circle-close-outline" @click="cancelTaskO">申请取消订单</el-button>
-          </el-button-group>
-          <el-button-group v-if="myTask.current_state === 'cancelledP'">
-            <el-button type="danger" icon="el-icon-close" @click="cancelTaskOP">同意取消订单</el-button>
-            <el-button type="warning" icon="el-icon-remove-outline" @click="cancelTaskRefuse">拒绝取消订单</el-button>
-          </el-button-group>
-          <el-button-group v-if="myTask.current_state === 'received'">
-            <el-button type="success" icon="el-icon-success" @click="signTask">签收</el-button>
-            <el-button type="danger" icon="el-icon-error" @click="refuseTask">拒签</el-button>
-          </el-button-group>
+          <el-form label-width="120px">
+            <el-form-item><el-button-group v-if="myTask.current_state === 'released'">
+              <el-button type="danger" icon="el-icon-close" @click="cancelTask">取消订单</el-button>
+            </el-button-group></el-form-item>
+            <el-button-group v-if="myTask.current_state === 'accepted'">
+              <el-button type="danger" icon="el-icon-circle-close-outline" @click="cancelTaskO">申请取消订单</el-button>
+            </el-button-group>
+            <el-button-group v-if="myTask.current_state === 'cancelledP'">
+              <el-button type="danger" icon="el-icon-close" @click="cancelTaskOP">同意取消订单</el-button>
+              <el-button type="warning" icon="el-icon-remove-outline" @click="cancelTaskRefuse">拒绝取消订单</el-button>
+            </el-button-group>
+            <el-button-group v-if="myTask.current_state === 'received'">
+              <el-button type="success" icon="el-icon-success" @click="signTask">签收</el-button>
+              <el-button type="danger" icon="el-icon-error" @click="refuseTask">拒签</el-button>
+            </el-button-group>
+          </el-form>
         </el-tab-pane>
 
         <el-tab-pane label="物品列表">
@@ -63,9 +66,40 @@
         </el-tab-pane>
 
         <el-tab-pane v-if="receiver" label="收货信息">
-          <label>收件人：</label>{{ receiver.receiver_name }}<br>
-          <label>收件地址：</label>{{ receiver.receiver_address.title }} &nbsp; {{ receiver.receiver_address.detail }}<br>
-          <label>联系电话：</label>{{ receiver.receiver_phone }}<br>
+
+          <el-form label-width="120px">
+            <el-form-item label="收件人">{{ receiver.receiver_name }}</el-form-item>
+            <el-form-item label="收件地址">{{ receiver.receiver_address.title }} &nbsp; {{ receiver.receiver_address.detail }}</el-form-item>
+            <el-form-item label="联系电话">{{ receiver.receiver_phone }}</el-form-item>
+            <el-form-item v-if="postman" label="递客">{{ postman.user_name }}</el-form-item>
+            <el-form-item v-if="postman" label="递客电话">{{ postman.phone_num }}</el-form-item>
+          </el-form>
+
+          <el-form v-if="myTask.task_comment" ref="comment" :model="comment" label-width="120px">
+            <el-form-item label="评分">
+              <span v-for="star in commentTemp.stars" style="padding: 0 2px 0 2px">
+                <img v-if="star <= comment.rate" src="/src/icons/svg/star-on.svg" height="24px">
+                <img v-if="star > comment.rate" src="/src/icons/svg/star-off.svg" height="24px">
+              </span>
+            </el-form-item>
+            <el-form-item label="评价">
+              <pre style="margin: 0; font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif"s>{{ comment.comment }}</pre>
+            </el-form-item>
+          </el-form>
+          <el-form v-else-if="commentableStates.indexOf(myTask.current_state) > -1" ref="comment" :model="comment" label-width="120px">
+            <el-form-item label="评分">
+              <span v-for="star in commentTemp.stars" style="padding: 0 2px 0 2px">
+                <img v-if="star <= commentTemp.rateTemp" src="/src/icons/svg/star-on.svg" height="24px" @click="setCommentRate(star)" @mouseenter="setCommentRateEnter(star)" @mouseleave="setCommentRateLeave">
+                <img v-if="star > commentTemp.rateTemp" src="/src/icons/svg/star-off.svg" height="24px" @click="setCommentRate(star)" @mouseenter="setCommentRateEnter(star)" @mouseleave="setCommentRateLeave">
+              </span>
+            </el-form-item>
+            <el-form-item label="评价">
+              <el-input v-model="comment.comment" type="textarea" placeholder="感谢您的评价，我们将努力提高服务质量"/>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="onSubmitComment">发布</el-button>
+            </el-form-item>
+          </el-form>
         </el-tab-pane>
 
         <el-tab-pane v-if="payment" label="支付信息">
@@ -117,9 +151,21 @@ export default {
       },
       center: { lng: 121, lat: 31 },
       zoom: 15,
-      traces_pos: [],
-      start_pos: [],
-      items_pos: [],
+      tracesPos: [],
+      startPos: [],
+      itemsPos: {
+        off: [],
+        on: []
+      },
+      commentableStates: ['signed', 'refused'],
+      comment: {
+        rate: 0,
+        comment: ''
+      },
+      commentTemp: {
+        rateTemp: 0,
+        stars: [1, 2, 3, 4, 5]
+      },
       myTask: null,
       receiver: null,
       items: [],
@@ -144,11 +190,15 @@ export default {
       this.$axios.get(url).then(res => {
         if (res.data['Item']) {
           this.items = res.data['Item']
-          this.items_pos = []
+          this.itemsPos = { off: [], on: [] }
           for (const i in this.items) {
             const item = this.items[i]
             item.item_address = JSON.parse(item.item_address)
-            this.items_pos.push(item.item_address)
+            if (item.item_state === 'on') {
+              this.itemsPos.on.push(item.item_address)
+            } else {
+              this.itemsPos.off.push(item.item_address)
+            }
           }
         }
       })
@@ -156,17 +206,17 @@ export default {
       this.$axios.get(url).then(res => {
         if (res.data['Trace']) {
           this.traces = res.data['Trace']
-          this.traces_pos = []
+          this.tracesPos = []
           this.traces.sort(function(a, b) {
             return a.trace_time.localeCompare(b.trace_time)
           })
           for (const i in this.traces) {
             const trace = this.traces[i]
             trace.trace_pos = JSON.parse(trace.trace_pos)
-            this.traces_pos.push(trace.trace_pos)
+            this.tracesPos.push(trace.trace_pos)
           }
           if (this.traces.length > 0) {
-            this.start_pos = [this.traces[0].trace_pos]
+            this.startPos = [this.traces[0].trace_pos]
           }
         }
       })
@@ -179,6 +229,10 @@ export default {
       this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid).then(res => {
         if (res.data['id']) {
           this.myTask = res.data
+          if (this.myTask.task_comment) {
+            this.comment = JSON.parse(this.myTask.task_comment)
+            this.commentTemp.rateTemp = this.comment.rate
+          }
           url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Receiver/' + this.myTask._receiver_uid
           this.$axios.get(url).then(res => {
             if (res.data['id']) {
@@ -193,6 +247,30 @@ export default {
               this.postman = res.data
             }
           })
+        }
+      })
+    },
+    setCommentRate(rate) {
+      this.comment.rate = rate
+    },
+    setCommentRateEnter(rate) {
+      this.commentTemp.rateTemp = rate
+    },
+    setCommentRateLeave() {
+      this.commentTemp.rateTemp = this.comment.rate
+    },
+    onSubmitComment() {
+      this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid).then(res => {
+        if (res.data['id'] && this.commentableStates.indexOf(res.data.current_state) > -1 && !res.data.task_comment) {
+          const currentTask = res.data
+          currentTask.task_comment = JSON.stringify({ rate: this.comment.rate, comment: this.comment.comment })
+          const url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid
+          this.$axios.put(url, currentTask).then(res => {
+            this.handleData()
+          })
+        } else {
+          alert('请在完成订单后再进行评价，请不要重复评价')
+          this.handleData()
         }
       })
     },
