@@ -22,7 +22,6 @@
               </template>
             </el-table-column>
             <el-table-column prop="task_des" label="描述"/>
-            <el-table-column prop="task_comment" label="评价"/>
           </el-table>
         </el-tab-pane>
 

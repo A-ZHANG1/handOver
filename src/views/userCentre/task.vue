@@ -103,10 +103,12 @@
         </el-tab-pane>
 
         <el-tab-pane v-if="payment" label="支付信息">
-          <label>支付状态：</label>{{ translate(payment.payment_state) }}<br>
-          <label>支付金额：</label>{{ payment.payment_amount }}<br>
-          <label>支付方式：</label>{{ translate(payment.payment_mode) }}<br>
-          <label>订单号：</label>{{ payment.order_num }}<br>
+          <el-form label-width="120px">
+            <el-form-item label="支付状态">{{ translate(payment.payment_state) }}</el-form-item>
+            <el-form-item label="支付金额">{{ payment.payment_amount }}</el-form-item>
+            <el-form-item label="支付方式">{{ translate(payment.payment_mode) }}</el-form-item>
+            <el-form-item label="订单号">{{ payment.order_num }}</el-form-item>
+          </el-form>
         </el-tab-pane>
 
         <el-tab-pane v-if="traces.length > 0" label="路径记录">
@@ -124,6 +126,28 @@
             </el-table-column>
           </el-table>
         </el-tab-pane>
+
+        <el-tab-pane v-if="traces.length > 0" label="实时对话">
+          <el-form label-width="120px">
+            <el-form-item v-for="message in messages" v-if="message.message_sender === 'postman'" label="递客">
+              {{ message.message_time }}
+              <pre style="line-height: 20px; margin: 2px;">{{ message.message_content }}</pre>
+            </el-form-item>
+            <el-form-item v-else-if="message.message_sender === 'owner'" label="我">
+              {{ message.message_time }}
+              <pre style="line-height: 20px; margin: 2px;">{{ message.message_content }}</pre>
+            </el-form-item>
+          </el-form>
+
+          <el-form label-width="120px">
+            <el-form-item label="我">
+              <el-input v-model="newMessage" type="textarea" placeholder="您有什么相对递客说的"/>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="onSubmitSendMessage">发送</el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
       </el-tabs>
 
     </Modal>
@@ -132,6 +156,9 @@
 <script>
 import { BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker, BmPointCollection } from 'vue-baidu-map'
 import { translateState } from '../../utils/translate'
+import { datePrototypeFormat } from '../../utils/dateFormat'
+
+Date.prototype.Format = datePrototypeFormat
 
 export default {
   components: {
@@ -151,6 +178,13 @@ export default {
       },
       center: { lng: 121, lat: 31 },
       zoom: 15,
+      myTask: null,
+      receiver: null,
+      items: [],
+      traces: [],
+      messages: [],
+      payment: null,
+      postman: null,
       tracesPos: [],
       startPos: [],
       itemsPos: {
@@ -166,19 +200,7 @@ export default {
         rateTemp: 0,
         stars: [1, 2, 3, 4, 5]
       },
-      myTask: null,
-      receiver: null,
-      items: [],
-      traces: [],
-      payment: null,
-      postman: null,
-      form: {
-        productName: '',
-        reward: '',
-        receiverName: '',
-        keyword: '',
-        note: ''
-      }
+      newMessage: ''
     }
   },
   created() {
@@ -218,6 +240,15 @@ export default {
           if (this.traces.length > 0) {
             this.startPos = [this.traces[0].trace_pos]
           }
+        }
+      })
+      url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Message/?Message._task_uid=' + this.$route.params.task_uid
+      this.$axios.get(url).then(res => {
+        if (res.data['Message']) {
+          this.messages = res.data['Message']
+          this.messages.sort(function(a, b) {
+            return a.message_time.localeCompare(b.message_time)
+          })
         }
       })
       url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Payment/?Payment._task_uid=' + this.$route.params.task_uid
@@ -272,6 +303,18 @@ export default {
           alert('请在完成订单后再进行评价，请不要重复评价')
           this.handleData()
         }
+      })
+    },
+    onSubmitSendMessage() {
+      const message = {
+        message_sender: 'owner',
+        message_time: new Date().Format('yyyy-MM-dd HH:mm:ss'),
+        message_content: this.newMessage,
+        _task_uid: this.$route.params.task_uid
+      }
+      this.$axios.post('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Message/', message).then(res => {
+        this.newMessage = ''
+        this.handleData()
       })
     },
     translate(state) {
