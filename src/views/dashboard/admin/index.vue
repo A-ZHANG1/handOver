@@ -26,12 +26,36 @@
           <el-input v-model.number="form.reward"/>
       </el-col>
       </el-form-item>
-      <el-form-item label="收件人姓名">
+     <!--  <el-form-item label="收件人姓名">
         <el-col :span=12>
           <el-input v-model="form.receiverName"/>
         </el-col>
+      </el-form-item> -->
+      <el-form-item label="新建收件人">
+        <el-col :span=12>
+          <el-button @click="showDialog()"/>
+        </el-col>
       </el-form-item>
-      <el-form-item label="收件地址">
+      <el-form-item label="常用收件人">
+        <el-collapse :span=12>
+          <el-collapse-item title="常用收件人列表">
+            <!-- v-for展开常用收件人 -->
+            <el-col :span=12 v-for="receiver in receiverData" :offset="1">
+            <el-card>
+              <div>
+                <!-- {{receiver.address}} -->
+                <span>{{receiver.receiver_name}}</span>
+                <span>{{receiver.receiver_address.title}}</span>
+                <span>{{receiver.receiver_address.detail}}</span>
+                <el-button @click="setReceiver">选定</el-button>
+                <el-button @click="deleteReceiver(receiver.id)">删除</el-button>
+              </div>
+            </el-card>
+          </el-col>
+          </el-collapse-item>
+        </el-collapse>
+      </el-form-item>
+      <el-form-item label="新增收件地址">
         <el-col :span=12>
       <baidu-map v-bind:style="mapStyle" class="bm-view" ak="K73Dbc6A1dKd3dLI0ikN5p83u5rKnGmy"
       :center="center" 
@@ -72,7 +96,7 @@
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">发布</el-button>
-        <el-button @click="onCancel">取消</el-button>
+        <!-- <el-button @click="onCancel">取消</el-button> -->
       </el-form-item>
     </el-form>
   </el-tab-pane>
@@ -82,6 +106,25 @@
 
   </el-tab-pane>
 </el-tabs>
+
+<!-- 添加收件人 -->
+  <el-dialog  title="添加收件人" :visible.sync="dialogFormVisible">
+      <el-form ref="dataForm"  :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="收件人姓名">
+            <el-input v-model="temp.receiver_name"/>          
+        </el-form-item>
+        <el-form-item label="地址">
+            <el-input v-model="temp.receiver_address"/>          
+        </el-form-item>
+        <el-form-item label="电话">
+            <el-input v-model="temp.receiver_phone"/>          
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取消</el-button>
+        <el-button type="primary" @click="createReceiver">确认</el-button>
+      </div>
+    </el-dialog>
 
   </div>  
 </template>
@@ -125,8 +168,29 @@
             receiverName: '张三',
             note: '随手1'
          },
+         temp:{
+            receiver_name:'',
+            receiver_address:'',
+            receiver_phone:''
+         },
          position:[],
-      }
+         receiverData:[
+          // {
+      //       name:"张三",
+      //       address:"软件1"
+      //     },
+      //     {
+      //       name:"张四",
+      //       address:"软件2"
+      //     },
+      // {
+      //   name:"张五",
+      //   address:"软件3"
+      // }
+      ],
+      dialogFormVisible: false,
+
+      }      
     },
     watch: {
       value: function (currentValue) {
@@ -143,13 +207,17 @@
         default: 500
       }
     },
-    created(){
+    updated(){
       // this.setPositions()
+      
     },
     mounted(){
+      this.getReceivers()
+      // console.log(this.receiverData)
+      // console.log("mounted")
+
         // this.setPositions()
-        console.log(getUserId())
-        console.log("mounted")
+        // this.getReceivers()
     },
     methods: {
       setPositions(){
@@ -170,6 +238,78 @@
         this.center.lng = lng
         this.center.lat = lat
         this.zoom = e.target.getZoom()
+      },
+      /***
+      *  查看常用收件人
+      */
+      getReceivers(){
+        let url='http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Receiver'
+        this.$axios.get(url).then(res => {
+          this.receiverData=res.data.Receiver
+          for (const i in this.receiverData) {
+            const receiver = this.receiverData[i]
+            receiver.receiver_address = JSON.parse(receiver.receiver_address)
+          }
+
+              })  
+      },
+      /***
+       * 选择收件人
+       */
+      showRecommendedPostman() {
+        
+        this.setPositions()
+
+      },
+      /***
+       * 删除常用收件人
+       */
+      // deleteReceiver(id) {
+      //   let url='http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Receiver'
+      // this.$axios.delete(url+"id")
+      // },
+      showDialog(){
+        this.dialogFormVisible=true
+      },
+      /***
+       * 添加收件人
+       */
+      createReceiver(){
+// tempUser={
+//   user_name:temp.receiver_name,
+//   passwd:"",
+//   phone_num:temp.receiver_phone,
+//   user_type:"receiver"
+// }
+        
+        this.receiverData.unshift(this.temp)
+
+        this.$axios(
+              {
+                url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/User', 
+                method:"post",
+                data:JSON.stringify(tempUser),
+                headers:{
+                  'Content-Type':'application/json'
+                }
+              })
+              .then(function (response) {
+              console.log(response);
+              console.log("posted");
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+
+
+        this.dialogFormVisible = false
+        this.$notify({
+              title: '成功',
+              message: '创建成功',
+              type: 'success',
+              duration: 2000
+            })
+
       },
       /***
        * 查看周边递客
