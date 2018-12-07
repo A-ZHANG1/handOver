@@ -226,7 +226,29 @@ function variate() {
   return
 }
 
-export function traceRecommend() {
+// _itemList: 地址列表，内容不重要，确保长度正确，取为LENGTH
+// _startPointDistance: 起始点到各个地址的距离（不要赋值为空数组，可以为null，视为没有起始点） 数组长度为LENGTH
+// _endPointDistance: 终止点到各个地址的距离（不要赋值为空数组，可以为null，视为没有终止点） 数组长度为LENGTH
+// _distanceTable: 各个地址之间的距离列表 注意顺序 数组长度为LENGTH*LENGTH
+export function traceRecommend(_itemList, _startPointDistance, _endPointDistance, _distanceTable) {
+  geneList = []
+  bestGene = null
+  startPoint = null
+  startPointDistance = []
+  endPoint = null
+  endPointDistance = []
+
+  traceList = _itemList
+  distanceTable = _distanceTable
+  if (_startPointDistance) {
+    startPoint = true
+    startPointDistance = _startPointDistance
+  }
+  if (_endPointDistance) {
+    endPoint = true
+    endPointDistance = _endPointDistance
+  }
+
   initializeGeneList()
   calculateFitness()
   removeBadGenes()
