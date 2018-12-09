@@ -208,55 +208,6 @@ export default {
   },
   methods: {
     handleData() {
-      let url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Item/?Item._task_uid=' + this.$route.params.task_uid
-      this.$axios.get(url).then(res => {
-        if (res.data['Item']) {
-          this.items = res.data['Item']
-          this.itemsPos = { off: [], on: [] }
-          for (const i in this.items) {
-            const item = this.items[i]
-            item.item_address = JSON.parse(item.item_address)
-            if (item.item_state === 'on') {
-              this.itemsPos.on.push(item.item_address)
-            } else {
-              this.itemsPos.off.push(item.item_address)
-            }
-          }
-        }
-      })
-      url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Trace/?Trace._task_uid=' + this.$route.params.task_uid
-      this.$axios.get(url).then(res => {
-        if (res.data['Trace']) {
-          this.traces = res.data['Trace']
-          this.tracesPos = []
-          this.traces.sort(function(a, b) {
-            return a.trace_time.localeCompare(b.trace_time)
-          })
-          for (const i in this.traces) {
-            const trace = this.traces[i]
-            trace.trace_pos = JSON.parse(trace.trace_pos)
-            this.tracesPos.push(trace.trace_pos)
-          }
-          if (this.traces.length > 0) {
-            this.startPos = [this.traces[0].trace_pos]
-          }
-        }
-      })
-      url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Message/?Message._task_uid=' + this.$route.params.task_uid
-      this.$axios.get(url).then(res => {
-        if (res.data['Message']) {
-          this.messages = res.data['Message']
-          this.messages.sort(function(a, b) {
-            return a.message_time.localeCompare(b.message_time)
-          })
-        }
-      })
-      url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Payment/?Payment._task_uid=' + this.$route.params.task_uid
-      this.$axios.get(url).then(res => {
-        if (res.data['Payment']) {
-          this.payment = res.data['Payment'][0]
-        }
-      })
       this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid).then(res => {
         if (res.data['id']) {
           this.myTask = res.data
@@ -264,19 +215,62 @@ export default {
             this.comment = JSON.parse(this.myTask.task_comment)
             this.commentTemp.rateTemp = this.comment.rate
           }
-          url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Receiver/' + this.myTask._receiver_uid
-          this.$axios.get(url).then(res => {
+          this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Receiver/' + this.myTask._receiver_uid).then(res => {
             if (res.data['id']) {
               this.receiver = res.data
               this.receiver.receiver_address = JSON.parse(this.receiver.receiver_address)
               this.center = this.receiver.receiver_address
             }
-          })
-          url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/User/' + this.myTask._postman_uid
-          this.$axios.get(url).then(res => {
-            if (res.data['id']) {
-              this.postman = res.data
-            }
+            this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/User/' + this.myTask._postman_uid).then(res => {
+              if (res.data['id']) {
+                this.postman = res.data
+              }
+              this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Item/?Item._task_uid=' + this.$route.params.task_uid).then(res => {
+                if (res.data['Item']) {
+                  this.items = res.data['Item']
+                  this.itemsPos = { off: [], on: [] }
+                  for (const i in this.items) {
+                    const item = this.items[i]
+                    item.item_address = JSON.parse(item.item_address)
+                    if (item.item_state === 'on') {
+                      this.itemsPos.on.push(item.item_address)
+                    } else {
+                      this.itemsPos.off.push(item.item_address)
+                    }
+                  }
+                }
+                this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Trace/?Trace._task_uid=' + this.$route.params.task_uid).then(res => {
+                  if (res.data['Trace']) {
+                    this.traces = res.data['Trace']
+                    this.tracesPos = []
+                    this.traces.sort(function(a, b) {
+                      return a.trace_time.localeCompare(b.trace_time)
+                    })
+                    for (const i in this.traces) {
+                      const trace = this.traces[i]
+                      trace.trace_pos = JSON.parse(trace.trace_pos)
+                      this.tracesPos.push(trace.trace_pos)
+                    }
+                    if (this.traces.length > 0) {
+                      this.startPos = [this.traces[0].trace_pos]
+                    }
+                  }
+                  this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Payment/?Payment._task_uid=' + this.$route.params.task_uid).then(res => {
+                    if (res.data['Payment']) {
+                      this.payment = res.data['Payment'][0]
+                    }
+                    this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Message/?Message._task_uid=' + this.$route.params.task_uid).then(res => {
+                      if (res.data['Message']) {
+                        this.messages = res.data['Message']
+                        this.messages.sort(function(a, b) {
+                          return a.message_time.localeCompare(b.message_time)
+                        })
+                      }
+                    })
+                  })
+                })
+              })
+            })
           })
         }
       })
