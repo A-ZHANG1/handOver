@@ -112,7 +112,7 @@
 
   <el-dialog  title="添加收件人" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm"  :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
-        {{temp.receiver_name}}
+        {{temp.receiver_name}}{{temp.receiver_address}}{{temp.receiver_tel}}
         <el-form-item label="姓名">
             <el-input v-model="temp.receiver_name"/>          
         </el-form-item>
@@ -199,8 +199,8 @@
             receiver_name:'',
             receiver_address:{
               title:'',
-              lng:'121',
-              lat:'31',
+              lng:'121.00',
+              lat:'31.00',
               detail:''
             },
             receiver_phone:''
@@ -254,7 +254,8 @@
         this.center.lat = e.point.lat
         this.temp.receiver_address.lng=e.point.lng
         this.temp.receiver_address.lat=e.point.lat
-        console.log(this.temp.receiver_address)
+        this.temp.receiver_address.title=this.keyword
+        // console.log(this.temp.receiver_address)
       },
       syncCenterAndZoom (e) {
         const {lng, lat} = e.target.getCenter()
@@ -314,12 +315,12 @@
                 receiver_phone:this.temp.receiver_phone,
                 receiver_address:JSON.stringify(this.temp.receiver_address)
             }
-        console.log(this.temp)
+        // console.log(this.temp)
         this.receiverData.unshift(this.temp)
 
         this.$axios(
               {
-                url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/', 
+                url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Receiver', 
                 method:"post",
                 data:JSON.stringify(newReceiver),
                 headers:{
@@ -328,7 +329,7 @@
               })
               .then(function (response) {
               console.log(response);
-              console.log("posted");
+              // console.log("posted");
             })
             .catch(function (error) {
               console.log(error);
