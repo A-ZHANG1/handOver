@@ -24,7 +24,7 @@
         </span>
       </el-form-item>
       <el-form-item>
-        <el-button :loading="loading" type="primary" style="width:100%;color:#b3c2bf;background-color: #e05038;" @click.native.prevent="handleLogin">
+        <el-button :loading="loading" type="primary" style="width:100%;color:#fafafa;background-color: #334431;" @click.native.prevent="handleLogin">
           Sign in
         </el-button>
       </el-form-item>
@@ -113,8 +113,8 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss">
-$bg:#2d3a4b;
-$light_gray:#eee;
+$bg:#e6cf8b;
+$light_gray:#334431;
 
 /* reset element-ui css */
 .login-container {
@@ -147,9 +147,10 @@ $light_gray:#eee;
 </style>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-$bg:#e9ece5;
+$bg:#fafafa;
+
 $dark_gray:#889aa4;
-$light_gray:#eee;
+$light_gray:#22264b;
 .login-container {
   position: fixed;
   height: 100%;
@@ -184,7 +185,7 @@ $light_gray:#eee;
   .title {
     font-size: 30px;
     font-weight: 400;
-    color:#e05038;
+    color:#334431;
     margin: 0px auto 40px auto;
     text-align: center;
     font-weight: bold;
