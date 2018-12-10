@@ -7,7 +7,7 @@
 -->
 <template>
   <div style="padding-top:50px; border:0px solid red">
-    {{ownerUID}}
+    {{ownerUID}}{{current_time}}
 <el-tabs type="border-card" v-model="showMapComponent">
   <!-- 采购任务tab -->
   <el-tab-pane label="代购">
@@ -48,8 +48,8 @@
                 <span>{{receiver.receiver_name}}</span>
                 <span>{{receiver.receiver_address.title}}</span>
                 <span>{{receiver.receiver_address.detail}}</span>
-                <el-button @click="setReceiver">选定</el-button>
-                <el-button @click="deleteReceiver(receiver.id)">删除</el-button>
+                <el-button @click="setReceiver(receiver)">选定</el-button>
+                <!-- <el-button @click="deleteReceiver(receiver.id)">删除</el-button> -->
               </div>
             </el-card>
           </el-col>
@@ -156,6 +156,7 @@
 <script>
   import {BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker,BmPointCollection} from 'vue-baidu-map'
   import { getUserId } from '@/utils/auth'
+  import moment from "moment"
 
 // const position=[{lng: 121.443, lat:31.032},{lng: 122, lat:28}]
 
@@ -171,6 +172,7 @@
     },
     data: function () {
       return {
+        current_time:moment().format('YYYY-MM-DD HH:mm:ss'),
         ownerUID:getUserId(),
         showMapComponent: this.value,
         keyword: '软件学院',
@@ -207,7 +209,7 @@
          },
          position:[],
          receiverData:[],
-         receiverOfCurrentOwner:[],
+         settedReceiver:[],
          dialogFormVisible: false,
 
       }      
@@ -290,9 +292,10 @@
       /***
        * 选择收件人
        */
-      showRecommendedPostman() {
+      setReceiver(receiver) {
         
-        this.setPositions()
+        this.settedReceiver=receiver
+        console.log(receiver)
 
       },
       /***
@@ -375,12 +378,24 @@
                   express_fee:this.form.reward,
                   current_state:"released",
                   task_type:"purchase",
-                  task_des:this.keyword,
+                  task_des:JSON.stringify(this.settedReceiver.receiver_address),
                   task_comment:this.note,
-                  _owner_uid:"1542712704340"
+                  _owner_uid:getUserId(),
+                  _receiver_uid:"nan",
+                  _post_man_uid:"nan",
+                  start_time:this.current_time,
+                  end_time:"nan",
+                  owner_name:"nan",
+                  postman_name:"nan",
+                  postman_phone:"nan",
+                  receiver_name:this.settedReceiver.receiver_name,
+                  receiver_address:JSON.stringify(this.settedReceiver.receiver_address),
+                  receiver_phone:this.settedReceiver.receiver_phone,
+                  payment_state:"nan"
+
                 }
 
-     // console.log(JSON.stringify(newTask,this.theReplacer));           
+     console.log(JSON.stringify(newTask,this.theReplacer));           
         this.$axios(
               {
                 url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task', 
