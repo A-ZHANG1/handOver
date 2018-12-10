@@ -7,6 +7,7 @@
 -->
 <template>
   <div style="padding-top:50px; border:0px solid red">
+    {{ownerUID}}
 <el-tabs type="border-card" v-model="showMapComponent">
   <!-- 采购任务tab -->
   <el-tab-pane label="代购">
@@ -31,12 +32,12 @@
           <el-input v-model="form.receiverName"/>
         </el-col>
       </el-form-item> -->
-      <el-form-item label="新建收件人">
+      <el-form-item label="收件人">
         <el-col :span=12>
-          <el-button @click="showDialog()"/>
+          <el-button @click="showDialog()">添加</el-button>
         </el-col>
       </el-form-item>
-      <el-form-item label="常用收件人">
+      <el-form-item label="我的收件人">
         <el-collapse :span=12>
           <el-collapse-item title="常用收件人列表">
             <!-- v-for展开常用收件人 -->
@@ -55,7 +56,7 @@
           </el-collapse-item>
         </el-collapse>
       </el-form-item>
-      <el-form-item label="新增收件地址">
+      <el-form-item label="选择递客">
         <el-col :span=12>
       <baidu-map v-bind:style="mapStyle" class="bm-view" ak="K73Dbc6A1dKd3dLI0ikN5p83u5rKnGmy"
       :center="center" 
@@ -107,14 +108,38 @@
   </el-tab-pane>
 </el-tabs>
 
-<!-- 添加收件人 -->
+<!-- 添加收件人 弹窗-->
+
   <el-dialog  title="添加收件人" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm"  :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="收件人姓名">
+      <el-form ref="dataForm"  :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
+        {{temp.receiver_name}}
+        <el-form-item label="姓名">
             <el-input v-model="temp.receiver_name"/>          
         </el-form-item>
         <el-form-item label="地址">
-            <el-input v-model="temp.receiver_address"/>          
+          <baidu-map v-bind:style="mapStyle" class="bm-view" ak="K73Dbc6A1dKd3dLI0ikN5p83u5rKnGmy"
+      :center="center" 
+      :zoom="zoom" 
+      :scroll-wheel-zoom="true" 
+      @click="setReceiverAddress"
+      @moving="syncCenterAndZoom" 
+      @moveend="syncCenterAndZoom" 
+      @zoomend="syncCenterAndZoom">
+        <bm-view style="width: 100%; height:500px;"></bm-view>
+        
+        <bm-control :offset="{width: '10px', height: '10px'}">
+          <!-- v-model="temp.receiver_address.title" -->
+          <bm-auto-complete v-model="keyword" :sugStyle="{zIndex: 999999}">
+            <input type="text" placeholder="如：闵行交大学生西67舍1" class="serachinput">
+          </bm-auto-complete>
+        </bm-control>
+
+        <bm-marker :position="{lng:temp.receiver_address.lng,lat:temp.receiver_address.lat}" >
+        </bm-marker>
+      </baidu-map>
+        </el-form-item>
+        <el-form-item label="详细地址">
+            <el-input placeholder="如：5310室" v-model="temp.receiver_address.detail"/>          
         </el-form-item>
         <el-form-item label="电话">
             <el-input v-model="temp.receiver_phone"/>          
@@ -146,8 +171,10 @@
     },
     data: function () {
       return {
+        ownerUID:getUserId(),
         showMapComponent: this.value,
         keyword: '软件学院',
+        receiverAddressKeyword: '学生西67舍',
         mapStyle: {
           width: '100%',
           height: this.mapHeight + 'px'
@@ -170,25 +197,18 @@
          },
          temp:{
             receiver_name:'',
-            receiver_address:'',
+            receiver_address:{
+              title:'',
+              lng:'121',
+              lat:'31',
+              detail:''
+            },
             receiver_phone:''
          },
          position:[],
-         receiverData:[
-          // {
-      //       name:"张三",
-      //       address:"软件1"
-      //     },
-      //     {
-      //       name:"张四",
-      //       address:"软件2"
-      //     },
-      // {
-      //   name:"张五",
-      //   address:"软件3"
-      // }
-      ],
-      dialogFormVisible: false,
+         receiverData:[],
+         receiverOfCurrentOwner:[],
+         dialogFormVisible: false,
 
       }      
     },
@@ -213,11 +233,6 @@
     },
     mounted(){
       this.getReceivers()
-      // console.log(this.receiverData)
-      // console.log("mounted")
-
-        // this.setPositions()
-        // this.getReceivers()
     },
     methods: {
       setPositions(){
@@ -229,9 +244,17 @@
       getClickInfo (e) {
         this.center.lng = e.point.lng
         this.center.lat = e.point.lat
-        // alert(e.point.lng)
-        // alert(e.point.lat)
      
+      },
+      /***
+       * 弹窗地图点击事件。
+       */
+      setReceiverAddress (e) {
+        this.center.lng = e.point.lng
+        this.center.lat = e.point.lat
+        this.temp.receiver_address.lng=e.point.lng
+        this.temp.receiver_address.lat=e.point.lat
+        console.log(this.temp.receiver_address)
       },
       syncCenterAndZoom (e) {
         const {lng, lat} = e.target.getCenter()
@@ -244,13 +267,23 @@
       */
       getReceivers(){
         let url='http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Receiver'
+        let receiverOfCurrentOwner=[]
         this.$axios.get(url).then(res => {
-          this.receiverData=res.data.Receiver
-          for (const i in this.receiverData) {
-            const receiver = this.receiverData[i]
-            receiver.receiver_address = JSON.parse(receiver.receiver_address)
+          // console.log(res.data.Receiver)
+          // this.receiverData=res.data.Receiver
+          for (var i in res.data.Receiver) {
+            let receiver = res.data.Receiver[i]
+            // console.log(receiver.user_uid)
+            if(receiver.user_uid==this.ownerUID){
+              // console.log("added")
+              receiver.receiver_address = JSON.parse(receiver.receiver_address)
+              receiverOfCurrentOwner.unshift(receiver)
+            }
+            
           }
-
+          this.receiverData=receiverOfCurrentOwner
+          // console.log(this.receiverOfCurrentOwner)
+          // console.log(this.receiverData)
               })  
       },
       /***
@@ -275,20 +308,20 @@
        * 添加收件人
        */
       createReceiver(){
-// tempUser={
-//   user_name:temp.receiver_name,
-//   passwd:"",
-//   phone_num:temp.receiver_phone,
-//   user_type:"receiver"
-// }
-        
+        let newReceiver={
+                user_uid:this.ownerUID,
+                receiver_name:this.temp.receiver_name,
+                receiver_phone:this.temp.receiver_phone,
+                receiver_address:JSON.stringify(this.temp.receiver_address)
+            }
+        console.log(this.temp)
         this.receiverData.unshift(this.temp)
 
         this.$axios(
               {
-                url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/User', 
+                url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/', 
                 method:"post",
-                data:JSON.stringify(tempUser),
+                data:JSON.stringify(newReceiver),
                 headers:{
                   'Content-Type':'application/json'
                 }
@@ -335,7 +368,7 @@
        * 表单提交事件
        */
       onSubmit(){
-        let ownerUID=getUserId()
+        // let ownerUID=getUserId()
         let newTask={
                   total_price:this.form.taskPrice,
                   express_fee:this.form.reward,
@@ -343,9 +376,8 @@
                   task_type:"purchase",
                   task_des:this.keyword,
                   task_comment:this.note,
-                  _owner_uid:ownerUID
+                  _owner_uid:"1542712704340"
                 }
-
 
      // console.log(JSON.stringify(newTask,this.theReplacer));           
         this.$axios(
