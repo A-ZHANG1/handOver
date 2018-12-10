@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
-      <h3 class="title">随手递</h3>
+      <h3 class="title">随手递HandOver</h3>
       <el-form-item prop="username">
         <span class="svg-container">
           <svg-icon icon-class="user" />
@@ -24,7 +24,7 @@
         </span>
       </el-form-item>
       <el-form-item>
-        <el-button :loading="loading" type="primary" style="width:100%;" @click.native.prevent="handleLogin">
+        <el-button :loading="loading" type="primary" style="width:100%;color:#b3c2bf;background-color: #e05038;" @click.native.prevent="handleLogin">
           Sign in
         </el-button>
       </el-form-item>
@@ -147,7 +147,7 @@ $light_gray:#eee;
 </style>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-$bg:#2d3a4b;
+$bg:#e9ece5;
 $dark_gray:#889aa4;
 $light_gray:#eee;
 .login-container {
@@ -182,12 +182,13 @@ $light_gray:#eee;
     display: inline-block;
   }
   .title {
-    font-size: 26px;
+    font-size: 30px;
     font-weight: 400;
-    color: $light_gray;
+    color:#e05038;
     margin: 0px auto 40px auto;
     text-align: center;
     font-weight: bold;
+    Font-family: "华文细黑"
   }
   .show-pwd {
     position: absolute;
