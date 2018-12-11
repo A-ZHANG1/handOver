@@ -11,7 +11,7 @@
                      class="bm-view"
                      ak="K73Dbc6A1dKd3dLI0ikN5p83u5rKnGmy">
             <bm-view style="width: 100%; height:300px;"/>
-            <bm-marker :position="receiver.receiver_address" :title="receiver.receiver_address.title" animation="BMAP_ANIMATION_BOUNCE"/>
+            <bm-marker :position="receiverAddress" :title="receiverAddress.title" animation="BMAP_ANIMATION_BOUNCE"/>
             <bm-point-collection :points="itemsPos.on" shape="BMAP_POINT_SHAPE_CIRCLE" color="green" size="BMAP_POINT_SIZE_BIGGER"/>
             <bm-point-collection :points="itemsPos.off" shape="BMAP_POINT_SHAPE_CIRCLE" color="red" size="BMAP_POINT_SIZE_BIGGER"/>
             <bm-point-collection :points="startPos" shape="BMAP_POINT_SHAPE_STAR" color="teal" size="BMAP_POINT_SIZE_HUGE"/>
@@ -65,14 +65,14 @@
           </el-table>
         </el-tab-pane>
 
-        <el-tab-pane v-if="receiver" label="收货信息">
+        <el-tab-pane label="收货信息">
 
           <el-form label-width="120px">
-            <el-form-item label="收件人">{{ receiver.receiver_name }}</el-form-item>
-            <el-form-item label="收件地址">{{ receiver.receiver_address.title }} &nbsp; {{ receiver.receiver_address.detail }}</el-form-item>
-            <el-form-item label="联系电话">{{ receiver.receiver_phone }}</el-form-item>
-            <el-form-item v-if="postman" label="递客">{{ postman.user_name }}</el-form-item>
-            <el-form-item v-if="postman" label="递客电话">{{ postman.phone_num }}</el-form-item>
+            <el-form-item label="收件人">{{ myTask.receiver_name }}</el-form-item>
+            <el-form-item label="收件地址">{{ receiverAddress.title }} &nbsp; {{ receiverAddress.detail }}</el-form-item>
+            <el-form-item label="联系电话">{{ myTask.receiver_phone }}</el-form-item>
+            <el-form-item v-if="postman" label="递客">{{ myTask.postman_name }}</el-form-item>
+            <el-form-item v-if="postman" label="递客电话">{{ myTask.postman_phone }}</el-form-item>
           </el-form>
 
           <el-form v-if="myTask.task_comment" ref="comment" :model="comment" label-width="120px">
@@ -102,12 +102,10 @@
           </el-form>
         </el-tab-pane>
 
-        <el-tab-pane v-if="payment" label="支付信息">
+        <el-tab-pane label="支付信息">
           <el-form label-width="120px">
-            <el-form-item label="支付状态">{{ translate(payment.payment_state) }}</el-form-item>
-            <el-form-item label="支付金额">{{ payment.payment_amount }}</el-form-item>
-            <el-form-item label="支付方式">{{ translate(payment.payment_mode) }}</el-form-item>
-            <el-form-item label="订单号">{{ payment.order_num }}</el-form-item>
+            <el-form-item label="支付状态">{{ translate(myTask.payment_state) }}</el-form-item>
+            <el-form-item label="支付金额">{{ myTask.total_price + myTask.express_fee }}</el-form-item>
           </el-form>
         </el-tab-pane>
 
@@ -153,6 +151,7 @@
     </Modal>
   </div>
 </template>
+
 <script>
 import { BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker, BmPointCollection } from 'vue-baidu-map'
 import { translateState } from '../../utils/translate'
@@ -179,12 +178,11 @@ export default {
       center: { lng: 121, lat: 31 },
       zoom: 15,
       myTask: null,
-      receiver: null,
+      receiverAddress: null,
       items: [],
       traces: [],
       messages: [],
-      payment: null,
-      postman: null,
+      postman: false,
       tracesPos: [],
       startPos: [],
       itemsPos: {
@@ -206,6 +204,8 @@ export default {
   created() {
     this.handleData()
   },
+  mounted() {
+  },
   methods: {
     handleData() {
       this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid).then(res => {
@@ -215,60 +215,50 @@ export default {
             this.comment = JSON.parse(this.myTask.task_comment)
             this.commentTemp.rateTemp = this.comment.rate
           }
-          this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Receiver/' + this.myTask._receiver_uid).then(res => {
-            if (res.data['id']) {
-              this.receiver = res.data
-              this.receiver.receiver_address = JSON.parse(this.receiver.receiver_address)
-              this.center = this.receiver.receiver_address
-            }
-            this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/User/' + this.myTask._postman_uid).then(res => {
-              if (res.data['id']) {
-                this.postman = res.data
-              }
-              this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Item/?Item._task_uid=' + this.$route.params.task_uid).then(res => {
-                if (res.data['Item']) {
-                  this.items = res.data['Item']
-                  this.itemsPos = { off: [], on: [] }
-                  for (const i in this.items) {
-                    const item = this.items[i]
-                    item.item_address = JSON.parse(item.item_address)
-                    if (item.item_state === 'on') {
-                      this.itemsPos.on.push(item.item_address)
-                    } else {
-                      this.itemsPos.off.push(item.item_address)
-                    }
-                  }
+          if (this.myTask.receiver_address) {
+            this.receiverAddress = JSON.parse(this.myTask.receiver_address)
+            this.center = this.receiverAddress
+          }
+          if (this.myTask.postman_phone && this.myTask.postman_phone !== '') {
+            this.postman = true
+          }
+          this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Item/?Item._task_uid=' + this.$route.params.task_uid).then(res => {
+            if (res.data['Item']) {
+              this.items = res.data['Item']
+              this.itemsPos = { off: [], on: [] }
+              for (const i in this.items) {
+                const item = this.items[i]
+                item.item_address = JSON.parse(item.item_address)
+                if (item.item_state === 'on') {
+                  this.itemsPos.on.push(item.item_address)
+                } else {
+                  this.itemsPos.off.push(item.item_address)
                 }
-                this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Trace/?Trace._task_uid=' + this.$route.params.task_uid).then(res => {
-                  if (res.data['Trace']) {
-                    this.traces = res.data['Trace']
-                    this.tracesPos = []
-                    this.traces.sort(function(a, b) {
-                      return a.trace_time.localeCompare(b.trace_time)
-                    })
-                    for (const i in this.traces) {
-                      const trace = this.traces[i]
-                      trace.trace_pos = JSON.parse(trace.trace_pos)
-                      this.tracesPos.push(trace.trace_pos)
-                    }
-                    if (this.traces.length > 0) {
-                      this.startPos = [this.traces[0].trace_pos]
-                    }
-                  }
-                  this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Payment/?Payment._task_uid=' + this.$route.params.task_uid).then(res => {
-                    if (res.data['Payment']) {
-                      this.payment = res.data['Payment'][0]
-                    }
-                    this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Message/?Message._task_uid=' + this.$route.params.task_uid).then(res => {
-                      if (res.data['Message']) {
-                        this.messages = res.data['Message']
-                        this.messages.sort(function(a, b) {
-                          return a.message_time.localeCompare(b.message_time)
-                        })
-                      }
-                    })
-                  })
+              }
+            }
+            this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Trace/?Trace._task_uid=' + this.$route.params.task_uid).then(res => {
+              if (res.data['Trace']) {
+                this.traces = res.data['Trace']
+                this.tracesPos = []
+                this.traces.sort(function(a, b) {
+                  return a.trace_time.localeCompare(b.trace_time)
                 })
+                for (const i in this.traces) {
+                  const trace = this.traces[i]
+                  trace.trace_pos = JSON.parse(trace.trace_pos)
+                  this.tracesPos.push(trace.trace_pos)
+                }
+                if (this.traces.length > 0) {
+                  this.startPos = [this.traces[0].trace_pos]
+                }
+              }
+              this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Message/?Message._task_uid=' + this.$route.params.task_uid).then(res => {
+                if (res.data['Message']) {
+                  this.messages = res.data['Message']
+                  this.messages.sort(function(a, b) {
+                    return a.message_time.localeCompare(b.message_time)
+                  })
+                }
               })
             })
           })

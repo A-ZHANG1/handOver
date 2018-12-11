@@ -13,6 +13,7 @@ export function translateState(state) {
     case 'purchase': return '代购'
     case 'on': return '已取件'
     case 'off': return '未取件'
+    case 'unpaid': return '未支付'
     case 'paid': return '已支付'
     case 'alipay': return '支付宝'
     case 'wechat': return '微信支付'
