@@ -107,6 +107,17 @@
             <el-form-item label="支付状态">{{ translate(myTask.payment_state) }}</el-form-item>
             <el-form-item label="支付金额">{{ myTask.total_price + myTask.express_fee }}</el-form-item>
           </el-form>
+          <el-form label-width="120px">
+            <el-form-item>
+              <el-button-group v-if="myTask.payment_state === 'unpaid'">
+                <el-button type="primary" icon="el-icon-mobile-phone" @click="qrcode">支付</el-button>
+                <el-button type="success" icon="el-icon-mobile-phone" @click="checkPayment">确认</el-button>
+              </el-button-group>
+            </el-form-item>
+            <el-form-item id="qrcode_form_item">
+              <canvas id="qrcode"/>
+            </el-form-item>
+          </el-form>
         </el-tab-pane>
 
         <el-tab-pane v-if="traces.length > 0" label="路径记录">
@@ -156,6 +167,7 @@
 import { BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker, BmPointCollection } from 'vue-baidu-map'
 import { translateState } from '../../utils/translate'
 import { datePrototypeFormat } from '../../utils/dateFormat'
+import QRCode from 'qrcode'
 
 Date.prototype.Format = datePrototypeFormat
 
@@ -336,6 +348,19 @@ export default {
           this.handleData()
         }
       })
+    },
+    qrcode() {
+      QRCode.toCanvas(document.getElementById('qrcode'), JSON.stringify(this.myTask), function (error) {
+        if (error) console.error(error)
+        console.log('success!')
+      })
+    },
+    checkPayment() {
+      this.handleData()
+      if (this.myTask.payment_state === 'unpaid') {
+        alert('未收到支付回执，请与递客或第三方支付平台进行确认')
+        document.getElementById('qrcode_form_item').firstChild.nextSibling.innerHTML = '<canvas id="qrcode"/>'
+      }
     }
   }
 }
