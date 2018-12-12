@@ -11,12 +11,20 @@
                      class="bm-view"
                      ak="K73Dbc6A1dKd3dLI0ikN5p83u5rKnGmy">
             <bm-view style="width: 100%; height:300px;"/>
-            <bm-marker :position="receiverAddress" :title="receiverAddress.title" animation="BMAP_ANIMATION_BOUNCE"/>
-            <bm-point-collection :points="itemsPos.on" shape="BMAP_POINT_SHAPE_CIRCLE" color="green" size="BMAP_POINT_SIZE_BIGGER"/>
-            <bm-point-collection :points="itemsPos.off" shape="BMAP_POINT_SHAPE_CIRCLE" color="red" size="BMAP_POINT_SIZE_BIGGER"/>
+            <bm-marker :position="receiverAddress" :title="receiverAddress.title + ' ' + receiverAddress.detail" animation="BMAP_ANIMATION_BOUNCE"/>
+            <bm-marker v-for="item in items"
+                       :position="item.item_address"
+                       :icon="item.item_state === 'on' ? {url: '/src/icons/png/item-on-24.png', size: {width: 24, height: 24}} : {url: '/src/icons/png/item-off-24.png', size: {width: 24, height: 24}}"
+                       @mouseover="setItem(item)"
+                       @mouseout="setItem(null)" />
             <bm-point-collection :points="startPos" shape="BMAP_POINT_SHAPE_STAR" color="teal" size="BMAP_POINT_SIZE_HUGE"/>
             <bm-polyline :path="tracesPos"/>
           </baidu-map>
+          <div v-if="selectedItem" style="width: 300px; background: #dfdfdf; position: absolute; top: 20px; right: 20px;">
+            {{ selectedItem.item_name }} ({{ translate(selectedItem.item_state) }}) <br>
+            {{ selectedItem.item_address['title'] }} <br>
+            {{ selectedItem.item_address['detail'] }}
+          </div>
 
           <el-form label-width="120px">
             <el-form-item label="订单号">{{ myTask.id }}</el-form-item>
@@ -24,7 +32,35 @@
             <el-form-item label="递送费">{{ myTask.express_fee }}</el-form-item>
             <el-form-item label="当前状态">{{ translate(myTask.current_state) }}</el-form-item>
             <el-form-item label="订单类型">{{ translate(myTask.task_type) }}</el-form-item>
-            <el-form-item label="描述">{{ myTask.task_des }}</el-form-item>
+            <el-form-item label="开始时间">{{ myTask.start_time }}</el-form-item>
+            <el-form-item label="结束时间">{{ myTask.end_time }}</el-form-item>
+            <el-form-item label="备注">{{ myTask.task_des }}</el-form-item>
+          </el-form>
+
+          <el-form v-if="myTask.task_comment" ref="comment" :model="comment" label-width="120px">
+            <el-form-item label="评分">
+              <span v-for="star in commentTemp.stars" style="padding: 0 2px 0 2px">
+                <img v-if="star <= comment.rate" src="/src/icons/svg/star-on.svg" height="24px">
+                <img v-if="star > comment.rate" src="/src/icons/svg/star-off.svg" height="24px">
+              </span>
+            </el-form-item>
+            <el-form-item label="评价">
+              <pre style="margin: 0; font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif"s>{{ comment.comment }}</pre>
+            </el-form-item>
+          </el-form>
+          <el-form v-else-if="commentableStates.indexOf(myTask.current_state) > -1" ref="comment" :model="comment" label-width="120px">
+            <el-form-item label="评分">
+              <span v-for="star in commentTemp.stars" style="padding: 0 2px 0 2px">
+                <img v-if="star <= commentTemp.rateTemp" src="/src/icons/svg/star-on.svg" height="24px" @click="setCommentRate(star)" @mouseenter="setCommentRateEnter(star)" @mouseleave="setCommentRateLeave">
+                <img v-if="star > commentTemp.rateTemp" src="/src/icons/svg/star-off.svg" height="24px" @click="setCommentRate(star)" @mouseenter="setCommentRateEnter(star)" @mouseleave="setCommentRateLeave">
+              </span>
+            </el-form-item>
+            <el-form-item label="评价">
+              <el-input v-model="comment.comment" type="textarea" placeholder="感谢您的评价，我们将努力提高服务质量"/>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="onSubmitComment">发布</el-button>
+            </el-form-item>
           </el-form>
 
           <el-form label-width="120px">
@@ -61,12 +97,10 @@
               </template>
             </el-table-column>
             <el-table-column prop="item_des" label="描述"/>
-            <el-table-column prop="item_image" label="图片"/>
           </el-table>
         </el-tab-pane>
 
-        <el-tab-pane label="收货信息">
-
+        <el-tab-pane label="收货支付">
           <el-form label-width="120px">
             <el-form-item label="收件人">{{ myTask.receiver_name }}</el-form-item>
             <el-form-item label="收件地址">{{ receiverAddress.title }} &nbsp; {{ receiverAddress.detail }}</el-form-item>
@@ -75,43 +109,17 @@
             <el-form-item v-if="postman" label="递客电话">{{ myTask.postman_phone }}</el-form-item>
           </el-form>
 
-          <el-form v-if="myTask.task_comment" ref="comment" :model="comment" label-width="120px">
-            <el-form-item label="评分">
-              <span v-for="star in commentTemp.stars" style="padding: 0 2px 0 2px">
-                <img v-if="star <= comment.rate" src="/src/icons/svg/star-on.svg" height="24px">
-                <img v-if="star > comment.rate" src="/src/icons/svg/star-off.svg" height="24px">
-              </span>
-            </el-form-item>
-            <el-form-item label="评价">
-              <pre style="margin: 0; font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif"s>{{ comment.comment }}</pre>
-            </el-form-item>
-          </el-form>
-          <el-form v-else-if="commentableStates.indexOf(myTask.current_state) > -1" ref="comment" :model="comment" label-width="120px">
-            <el-form-item label="评分">
-              <span v-for="star in commentTemp.stars" style="padding: 0 2px 0 2px">
-                <img v-if="star <= commentTemp.rateTemp" src="/src/icons/svg/star-on.svg" height="24px" @click="setCommentRate(star)" @mouseenter="setCommentRateEnter(star)" @mouseleave="setCommentRateLeave">
-                <img v-if="star > commentTemp.rateTemp" src="/src/icons/svg/star-off.svg" height="24px" @click="setCommentRate(star)" @mouseenter="setCommentRateEnter(star)" @mouseleave="setCommentRateLeave">
-              </span>
-            </el-form-item>
-            <el-form-item label="评价">
-              <el-input v-model="comment.comment" type="textarea" placeholder="感谢您的评价，我们将努力提高服务质量"/>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="onSubmitComment">发布</el-button>
-            </el-form-item>
-          </el-form>
-        </el-tab-pane>
-
-        <el-tab-pane label="支付信息">
-          <el-form label-width="120px">
-            <el-form-item label="支付状态">{{ translate(myTask.payment_state) }}</el-form-item>
+          <el-form v-if="myTask.current_state === 'paid'" label-width="120px">
+            <el-form-item label="支付状态">已支付</el-form-item>
             <el-form-item label="支付金额">{{ myTask.total_price + myTask.express_fee }}</el-form-item>
           </el-form>
-          <el-form label-width="120px">
+          <el-form v-else label-width="120px">
+            <el-form-item label="支付状态">未支付 请点击下方按钮扫码支付</el-form-item>
+            <el-form-item label="应付金额">{{ myTask.total_price + myTask.express_fee }}</el-form-item>
             <el-form-item>
-              <el-button-group v-if="myTask.payment_state === 'unpaid'">
+              <el-button-group>
                 <el-button type="primary" icon="el-icon-mobile-phone" @click="qrcode">支付</el-button>
-                <el-button type="success" icon="el-icon-mobile-phone" @click="checkPayment">确认</el-button>
+                <el-button type="success" icon="el-icon-message" @click="checkPayment">通知递客</el-button>
               </el-button-group>
             </el-form-item>
             <el-form-item id="qrcode_form_item">
@@ -120,7 +128,7 @@
           </el-form>
         </el-tab-pane>
 
-        <el-tab-pane v-if="traces.length > 0" label="路径记录">
+        <el-tab-pane label="路径记录">
           <el-table :data="traces">
             <el-table-column prop="trace_time" label="时间"/>
             <el-table-column label="经度">
@@ -136,7 +144,7 @@
           </el-table>
         </el-tab-pane>
 
-        <el-tab-pane v-if="traces.length > 0" label="实时对话">
+        <el-tab-pane label="实时对话">
           <el-form label-width="120px">
             <el-form-item v-for="message in messages" v-if="message.message_sender === 'postman'" label="递客">
               {{ message.message_time }}
@@ -197,11 +205,12 @@ export default {
       postman: false,
       tracesPos: [],
       startPos: [],
-      itemsPos: {
+      itemsPart: {
         off: [],
         on: []
       },
-      commentableStates: ['signed', 'refused'],
+      selectedItem: null,
+      commentableStates: ['signed', 'refused', 'paid'],
       comment: {
         rate: 0,
         comment: ''
@@ -215,6 +224,7 @@ export default {
   },
   created() {
     this.handleData()
+    setInterval(this.handleData, 1000 * 10)
   },
   mounted() {
   },
@@ -237,14 +247,16 @@ export default {
           this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Item/?Item._task_uid=' + this.$route.params.task_uid).then(res => {
             if (res.data['Item']) {
               this.items = res.data['Item']
-              this.itemsPos = { off: [], on: [] }
+              this.itemsPart = { off: [], on: [] }
               for (const i in this.items) {
                 const item = this.items[i]
-                item.item_address = JSON.parse(item.item_address)
-                if (item.item_state === 'on') {
-                  this.itemsPos.on.push(item.item_address)
-                } else {
-                  this.itemsPos.off.push(item.item_address)
+                if (item.item_address) {
+                  item.item_address = JSON.parse(item.item_address)
+                  if (item.item_state === 'on') {
+                    this.itemsPart.on.push(item)
+                  } else {
+                    this.itemsPart.off.push(item)
+                  }
                 }
               }
             }
@@ -329,12 +341,12 @@ export default {
       this.changeTaskState('cancelledP', 'accepted', '当前状态无法拒绝取消订单')
     },
     signTask() {
-      this.changeTaskState('received', 'signed', '当前状态无法签收订单')
+      this.changeTaskState('received', 'signed', '当前状态无法签收订单', this.askForComment)
     },
     refuseTask() {
-      this.changeTaskState('received', 'refused', '当前状态无法拒收订单')
+      this.changeTaskState('received', 'refused', '当前状态无法拒收订单', this.askForComment)
     },
-    changeTaskState(originState, finalState, alertMessage) {
+    changeTaskState(originState, finalState, alertMessage, callback) {
       this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid).then(res => {
         if (res.data['id'] && res.data.current_state === originState) {
           const currentTask = res.data
@@ -342,6 +354,9 @@ export default {
           const url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task/' + this.$route.params.task_uid
           this.$axios.put(url, currentTask).then(res => {
             this.handleData()
+            if (callback) {
+              callback()
+            }
           })
         } else {
           alert(alertMessage)
@@ -358,13 +373,26 @@ export default {
     checkPayment() {
       this.handleData()
       if (this.myTask.payment_state === 'unpaid') {
-        alert('未收到支付回执，请与递客或第三方支付平台进行确认')
+        this.$message('未收到支付回执，请与递客或第三方支付平台进行确认')
         document.getElementById('qrcode_form_item').firstChild.nextSibling.innerHTML = '<canvas id="qrcode"/>'
       }
+    },
+    askForComment() {
+      this.$message('此次订单已结束，请您为订单进行评价')
+    },
+    setItem(item) {
+      this.selectedItem = item
     }
   }
 }
 </script>
 
 <style scoped>
+  .el-form-item {
+    margin-bottom: 2px !important;
+  }
+  canvas {
+    max-height: 200px !important;
+    max-width: 200px !important;
+  }
 </style>

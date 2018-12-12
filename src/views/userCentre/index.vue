@@ -2,7 +2,7 @@
   <div style="padding-top:50px; border:0px solid red">
     <Modal>
       <el-tabs type="border-card">
-        <el-tab-pane label="我的订单">
+        <el-tab-pane label="所有订单">
           <el-table :data="myTasks">
             <el-table-column label="订单号">
               <template slot-scope="scope">
@@ -21,7 +21,11 @@
                 {{ translate(scope.row.task_type) }}
               </template>
             </el-table-column>
-            <el-table-column prop="task_des" label="描述"/>
+            <el-table-column prop="receiver_name" label="收件人"/>
+            <el-table-column prop="address" label="收件地址"/>
+            <el-table-column prop="postman_name" label="递客"/>
+            <el-table-column prop="date" label="日期"/>
+            <el-table-column prop="task_des" label="备注"/>
           </el-table>
         </el-tab-pane>
 
@@ -44,8 +48,11 @@
                 {{ translate(scope.row.task_type) }}
               </template>
             </el-table-column>
-            <el-table-column prop="task_des" label="描述"/>
-            <el-table-column prop="task_comment" label="评价"/>
+            <el-table-column prop="receiver_name" label="收件人"/>
+            <el-table-column prop="address" label="收件地址"/>
+            <el-table-column prop="postman_name" label="递客"/>
+            <el-table-column prop="date" label="日期"/>
+            <el-table-column prop="task_des" label="备注"/>
           </el-table>
         </el-tab-pane>
 
@@ -68,8 +75,11 @@
                 {{ translate(scope.row.task_type) }}
               </template>
             </el-table-column>
-            <el-table-column prop="task_des" label="描述"/>
-            <el-table-column prop="task_comment" label="评价"/>
+            <el-table-column prop="receiver_name" label="收件人"/>
+            <el-table-column prop="address" label="收件地址"/>
+            <el-table-column prop="postman_name" label="递客"/>
+            <el-table-column prop="date" label="日期"/>
+            <el-table-column prop="task_des" label="备注"/>
           </el-table>
         </el-tab-pane>
       </el-tabs>
@@ -87,13 +97,7 @@ export default {
       myTasks: [],
       currentTasks: [],
       historyTasks: [],
-      form: {
-        productName: '',
-        reward: '',
-        receiverName: '',
-        keyword: '',
-        note: ''
-      }
+      finishedStates: ['cancelled', 'cancelledOP', 'signed', 'refused', 'paid']
     }
   },
   created() {
@@ -109,10 +113,19 @@ export default {
           this.currentTasks = []
           for (const i in this.myTasks) {
             const task = this.myTasks[i]
-            if (task.current_state === 'finished') {
-              this.historyTasks.push(JSON.parse(JSON.stringify(task)))
+            if (task.receiver_address) {
+              task.receiver_address = JSON.parse(task.receiver_address)
+              if (task.receiver_address.title) {
+                task.address = task.receiver_address.title + '\n' + task.receiver_address.detail
+              }
+            }
+            if (task.start_time) {
+              task.date = task.start_time.substring(0, 10)
+            }
+            if (this.finishedStates.indexOf(task.current_state) > -1) {
+              this.historyTasks.push(task)
             } else {
-              this.currentTasks.push(JSON.parse(JSON.stringify(task)))
+              this.currentTasks.push(task)
             }
           }
         }
