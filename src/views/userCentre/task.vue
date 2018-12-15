@@ -11,19 +11,19 @@
                      class="bm-view"
                      ak="K73Dbc6A1dKd3dLI0ikN5p83u5rKnGmy">
             <bm-view style="width: 100%; height:300px;"/>
-            <bm-marker :position="receiverAddress" :title="receiverAddress.title + ' ' + receiverAddress.detail" animation="BMAP_ANIMATION_BOUNCE"/>
+            <bm-marker :position="receiverAddress" :title="receiverAddress.title + ' ' + receiverAddress.detail" animation="BMAP_ANIMATION_BOUNCE" @mouseover="onOverEndPoint" @mouseout="onLeavePoint"/>
+            <bm-marker v-if="postman_pos" :position="postman_pos" :icon="{url: '/src/icons/png/postman-red-24.png', size: {width: 24, height: 24}}" title="递客当前位置" @mouseover="onOverPostman" @mouseout="onLeavePoint"/>
             <bm-marker v-for="item in items"
+                       v-if="item.item_address"
                        :position="item.item_address"
                        :icon="item.item_state === 'on' ? {url: '/src/icons/png/item-on-24.png', size: {width: 24, height: 24}} : {url: '/src/icons/png/item-off-24.png', size: {width: 24, height: 24}}"
-                       @mouseover="setItem(item)"
-                       @mouseout="setItem(null)" />
+                       @mouseover="onOverItem(item)"
+                       @mouseout="onLeavePoint" />
             <bm-point-collection :points="startPos" shape="BMAP_POINT_SHAPE_STAR" color="teal" size="BMAP_POINT_SIZE_HUGE"/>
             <bm-polyline :path="tracesPos"/>
           </baidu-map>
-          <div v-if="selectedItem" style="width: 300px; background: #dfdfdf; position: absolute; top: 20px; right: 20px;">
-            {{ selectedItem.item_name }} ({{ translate(selectedItem.item_state) }}) <br>
-            {{ selectedItem.item_address['title'] }} <br>
-            {{ selectedItem.item_address['detail'] }}
+          <div v-if="mapMessagePad" style="width: 300px; background: #dfdfdf; position: absolute; top: 20px; right: 20px;">
+            <pre style="margin: 2px; white-space: pre-wrap; word-wrap: break-word;">{{ mapMessagePad }}</pre>
           </div>
 
           <el-form label-width="120px">
@@ -113,7 +113,7 @@
             <el-form-item label="支付状态">已支付</el-form-item>
             <el-form-item label="支付金额">{{ myTask.total_price + myTask.express_fee }}</el-form-item>
           </el-form>
-          <el-form v-else label-width="120px">
+          <el-form v-else-if="myTask.current_state === 'signed'" label-width="120px">
             <el-form-item label="支付状态">未支付 请点击下方按钮扫码支付</el-form-item>
             <el-form-item label="应付金额">{{ myTask.total_price + myTask.express_fee }}</el-form-item>
             <el-form-item>
@@ -209,7 +209,8 @@ export default {
         off: [],
         on: []
       },
-      selectedItem: null,
+      postman_pos: null,
+      mapMessagePad: null,
       commentableStates: ['signed', 'refused', 'paid'],
       comment: {
         rate: 0,
@@ -283,6 +284,11 @@ export default {
                     return a.message_time.localeCompare(b.message_time)
                   })
                 }
+                this.$axios.get('http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/User/' + this.myTask._postman_uid).then(res => {
+                  if (res.data['current_pos']) {
+                    this.postman_pos = JSON.parse(res.data['current_pos'])
+                  }
+                })
               })
             })
           })
@@ -380,8 +386,23 @@ export default {
     askForComment() {
       this.$message('此次订单已结束，请您为订单进行评价')
     },
-    setItem(item) {
-      this.selectedItem = item
+    onOverItem(item) {
+      if (item) {
+        this.mapMessagePad = item.item_name + ' (' + this.translate(item.item_state) + ')\n' +
+          item.item_address.title + '\n' + item.item_address.detail
+      } else {
+        this.mapMessagePad = ''
+      }
+    },
+    onOverPostman() {
+      this.mapMessagePad = '递客当前位置\n' + this.myTask.postman_name + '(' + this.myTask.postman_phone + ')\n我们的递客正在全速为您运送物品'
+    },
+    onOverEndPoint() {
+      this.mapMessagePad = '收件人地址\n' + this.myTask.receiver_name + '(' + this.myTask.receiver_phone + ')\n' +
+        this.receiverAddress.title + '\n' + this.receiverAddress.detail
+    },
+    onLeavePoint() {
+      this.mapMessagePad = ''
     }
   }
 }
