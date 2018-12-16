@@ -22,10 +22,15 @@ import Layout from '../views/layout/Layout'
   }
 **/
 export const constantRouterMap = [
-  { path: '/login',
-  component: () => import('@/views/login/index'),
-  meta: { title: 'login',
-  icon: 'example' },},
+  {
+    path: '/login',
+    component: () => import('@/views/login/index'),
+    meta:
+    {
+      title: 'login',
+      icon: 'example'
+    }
+  },
   { path: '/404', component: () => import('@/views/404'), hidden: true },
 
   {
@@ -36,10 +41,32 @@ export const constantRouterMap = [
     children: [{
       path: 'dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: 'Dashboard', icon: 'eye',roles: ['admin','editor'] }
+      meta: { title: '代购', icon: 'shopping', roles: ['admin', 'editor'] }
     }]
   },
 
+  {
+    path: '/delivery',
+    component: Layout,
+    redirect: '/delivery',
+    name: 'delivery',
+    children: [{
+      path: 'delivery',
+      component: () => import('@/views/dashboard/admin/paotui'),
+      meta: { title: '取送件', icon: 'lock', roles: ['admin', 'editor'] }
+    }]
+  },
+  {
+    path: '/dynamicForm',
+    component: Layout,
+    redirect: '/dynamicForm',
+    name: '/dynamicForm',
+    children: [{
+      path: 'dynamicForm',
+      component: () => import('@/views/dashboard/admin/dynamicForm'),
+      meta: { title: '测试', icon: 'lock', roles: ['admin', 'editor'] }
+    }]
+  },
   {
     path: '/userCentre',
     component: Layout,
@@ -74,7 +101,7 @@ export default new Router({
 })
 
 export const asyncRouterMap = [
-{
+  {
     path: '/permission',
     component: Layout,
     redirect: '/permission/index',
@@ -105,7 +132,6 @@ export const asyncRouterMap = [
       }
     ]
   },
-
 
   {
     path: 'external-link',

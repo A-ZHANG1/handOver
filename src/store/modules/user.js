@@ -1,5 +1,5 @@
 import { login, logout, getInfo } from '@/api/login'
-import { getToken, setToken, removeToken,setUserId,removeUserId,getUserId } from '@/utils/auth'
+import { getToken, setToken, removeToken, setUserId, removeUserId, getUserId } from '@/utils/auth'
 import { Ajax } from '../../utils/myAjax'
 
 const user = {
@@ -50,7 +50,7 @@ const user = {
 
       // })
 
-           return new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         const url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/User/?User.phone_num=' + username
         Ajax.get(url, function(data) {
           const ajaxData = JSON.parse(data)
@@ -61,27 +61,22 @@ const user = {
             if (user2login['passwd'] !== password) {
               alert('用户名或密码错误')
             } else {
-
               setUserId(user2login['id'])
 
-              if(user2login['user_type']=='owner'){
-                setToken('admin')     
+              if (user2login['user_type'] === 'owner') {
+                setToken('admin')
                 commit('SET_TOKEN', 'admin')
-              }else{
+              } else {
                 setToken('editor')
                 commit('SET_TOKEN', 'editor')
-              }
-              
+              }  
             }
           }
           resolve()
         })
       }).catch(error => {
-          reject(error)
-        })
-      // console.log(user2login['passwd'])
-       // console.log("login")
-       
+        reject(error)
+      })     
     },
 
     // 获取用户信息
@@ -125,7 +120,7 @@ const user = {
         resolve()
       })
     },
-        // 动态修改权限
+    // 动态修改权限
     ChangeRoles({ commit, dispatch }, role) {
       return new Promise(resolve => {
         commit('SET_TOKEN', role)
@@ -141,9 +136,6 @@ const user = {
         })
       })
     }
-
-
-
   }
 }
 
