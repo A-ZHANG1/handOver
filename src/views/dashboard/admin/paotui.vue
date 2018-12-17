@@ -6,58 +6,95 @@
    :position 设置在data return 中监听改变
 -->
 <template>
-  <div style="padding-top:50px; border:1px solid LightGrey;width:1300px;">
-    <el-form label-width="120px" v-model="showMapComponent">
+  <div style="padding-top:50px; border:1px solid lightGrey;width=1980px;">
+<el-tabs type="border-card" v-model="showMapComponent">
 
-<!-- 动态添加商品和位置的表格 -->
-<el-form :model="dynamicValidateForm" label-width="100px">
-  <!-- 商品名 --> 
-      <!-- :label="'商品名' + index" -->
-      <!-- :key="domain.key" -->
-  <el-form-item><div style="font-size:26px;color:gray;">物品信息</div></el-form-item>
-  <el-form-item
-    v-for="(domain, index) in dynamicValidateForm.domains"
-    :key="domain.key"
-    :prop="'domains.' + index + '.value'"
-    style="width: 900px;"
-  >
-  <el-row :gutter="20">
-  <el-col :span="8" :gutter="10">
-    <el-input v-model="domain.value" placeholder="品名"></el-input>
-  </el-col>
-  <el-col :span="4">
-    <el-input v-model.number="domain.price" placeholder="预估价格"></el-input>
-  </el-col>
-  <el-col :span="10">
-    <el-input v-model="domain.des" placeholder="商品描述"></el-input>
-  </el-col>
-    <!-- <el-col :span="4">
-    <el-input-number v-model="domain.weight" placeholder="重量"></el-input-number>
-  </el-col> -->
-  <el-col :span="2">
-    <el-button @click="removeDomain(domain)" icon="el-icon-minus" type="danger" circle></el-button>
-  </el-col>
-  </el-row>
+<!-- 配送任务tab -->
+ <el-tab-pane label="跑腿">
+    <el-form ref="item" :model="item" label-width="120px">
+<!-- 添加待取件物品 -->
+   <el-form-item><div style="font-size:26px;color:gray;">物品信息</div></el-form-item>
+      <el-form-item>
+      <el-row>
+        <el-col :span="8">
+          <el-input v-model="item.productName" placeholder="物品名称">
+          </el-input>
+        </el-col>
+        <el-col :offset="2" :span=4>
+          <el-input  v-model="item.productSize" placeholder="预估重量">
+            <template slot="append">kg</template>
+          </el-input>
+        </el-col>
+      </el-row>
+      </el-form-item>    
 
+      <el-form-item>
+          
+        <el-col :span="14">
+          <el-input  type="textarea" v-model="item.des" placeholder="简要描述"></el-input>
+      </el-col>
+      </el-form-item>
+  
+<!-- 取件地址 -->
+      <el-form-item>
+        <el-col :span=12>
+      <baidu-map v-bind:style="mapStyle" class="bm-view" ak="K73Dbc6A1dKd3dLI0ikN5p83u5rKnGmy"
+      :center="center" 
+      :zoom="zoom" 
+      :scroll-wheel-zoom="true" 
+      @click="setItemAddress"
+      @moving="syncCenterAndZoom" 
+      @moveend="syncCenterAndZoom" 
+      @zoomend="syncCenterAndZoom">
+        <bm-view style="width: 100%; height:500px;"></bm-view>
+        
+        <bm-control :offset="{width: '10px', height: '10px'}">
+          <!-- v-model="temp.receiver_address.title" -->
+          <bm-auto-complete v-model="keyword" :sugStyle="{zIndex: 999999}">
+            <input type="text" placeholder="请填写取件地址，如：闵行交大学生西67舍" class="serachinput">
+          </bm-auto-complete>
+        </bm-control>
+        <bm-local-search :keyword="keyword" :auto-viewport="true" style="width:0px;height:0px;overflow: hidden;"></bm-local-search>
+        <bm-marker :position="{lng:item.item_address.lng,lat:item.item_address.lat}" >
+        </bm-marker>
+      </baidu-map>
+    </el-col>
+    
   </el-form-item>
- 
-<!-- 新增按键 -->
+
+  <!-- 新建物品 -->
   <el-form-item>
-    <el-col :span="10" :offset="10">
-      <el-button @click="addDomain" icon="el-icon-plus" type="success" circle></el-button>
-    </el-col>
+  <el-col :offset="10">
+    <el-button type="success" @click="addItem">确认添加</el-button>
+  </el-col>
   </el-form-item>
 
-<!-- 显示总价 -->
-<el-form-item>
-  <el-row>
-    <el-col :offset="20">
-    <!-- <div v-for="(domain, index) in dynamicValidateForm.domains" :key="domain.key">{{domain.price}}</div> -->
-      <div  style="font-size:16px;color:gray;align:right">预估总价:{{itemPriceSum()}}</div>
-    </el-col>
-  </el-row>
-</el-form-item>
-</el-form>
+<!-- 显示当前物品信息 -->
+   <el-form-item><div style="font-size:26px;color:gray;">已添加物品</div>
+      <el-table :data="itemList" highlight-current-row>
+              <el-table-column prop="item_name" width="180"/>
+              <el-table-column prop="item_address.title" width="380"/>
+              <el-table-column prop="senderPhoneNum" width="180"/>
+              <!-- <el-table-column prop="receiver_phone" width="180"/> -->
+                <el-table-column>
+                  <template scope="scope">
+                    <el-button type="info" icon="el-icon-goods" circle></el-button>
+                  </template>
+                </el-table-column> 
+      </el-table>   
+   </el-form-item>
+
+<!-- 任务悬赏金设置 -->
+  <el-form-item label="悬赏金" placeholder="系统预估费用">
+        <el-row>
+        <el-col :span=12>
+          <el-input v-model.number="form.reward"/>
+        </el-col>
+        </el-row>
+        <el-row>
+          <span>系统推荐悬赏金：￥</span>
+        </el-row>
+      </el-form-item>
 
 <!-- 选择收件人 -->
       <el-form-item label="收件人" size="mini"  required="true">           
@@ -89,9 +126,16 @@
           </el-collapse-item>
         </el-collapse>
         </div>
-      </el-form-item>   
+      </el-form-item> 
+
+       <!-- <el-form-item>   
+        <el-col :span=12>
+          <el-button type="primary" @click="showRecommendedPostman">查看周边递客</el-button>   
+        </el-col>  
+        </el-form-item> -->
+     
       <el-form-item label="备注">
-        <el-col :span=23>
+        <el-col :span=12>
           <el-input v-model="form.note" type="textarea"/>
       </el-col>
       </el-form-item>
@@ -100,11 +144,13 @@
         <!-- <el-button @click="onCancel">取消</el-button> -->
       </el-form-item>
     </el-form>
+  </el-tab-pane>
+</el-tabs> 
 
 <!-- 添加收件人 弹窗-->
   <el-dialog  title="添加收件人" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm"  :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
-        {{temp.receiver_name}}{{temp.receiver_address}}{{temp.receiver_tel}}
+        <!-- {{temp.receiver_name}}{{temp.receiver_address}}{{temp.receiver_tel}} -->
         <el-form-item label="姓名">
             <el-input v-model="temp.receiver_name"/>          
         </el-form-item>
@@ -120,8 +166,9 @@
         <bm-view style="width: 100%; height:500px;"></bm-view>
         
         <bm-control :offset="{width: '10px', height: '10px'}">
+          <!-- v-model="temp.receiver_address.title" -->
           <bm-auto-complete v-model="keyword" :sugStyle="{zIndex: 999999}">
-            <input type="text" placeholder="如：闵行交大学生西67舍" class="serachinput">
+            <input type="text" placeholder="如：闵行交大学生西67舍1" class="serachinput">
           </bm-auto-complete>
         </bm-control>
 
@@ -141,13 +188,13 @@
         <el-button type="primary" @click="createReceiver">确认</el-button>
       </div>
     </el-dialog>
-
   </div>  
 </template>
 <script>
   import {BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker,BmPointCollection} from 'vue-baidu-map'
   import { getUserId } from '@/utils/auth'
   import moment from "moment"
+  import { traceRecommend } from '@/utils/TraceRecommend'
 
 // const position=[{lng: 121.443, lat:31.032},{lng: 122, lat:28}]
 
@@ -165,6 +212,8 @@
       return {
         current_time:moment().format('YYYY-MM-DD HH:mm:ss'),
         ownerUID:getUserId(),
+        senderName:null,
+        senderPhoneNum:null,
         showMapComponent: this.value,
         keyword: '',
         // receiverAddressKeyword: '学生西67舍',
@@ -173,48 +222,40 @@
           height: this.mapHeight + 'px'
         },
         center: {lng: 121.443, lat:31.032},
-        zoom: 15,       
-        form: {
-            priceSum:0,  
-            note: ''
+        zoom: 15,
+        form: { 
+            reward:0,          
+            note: '如果收件人不在，放在工位上就可以了'
          },
-         dynamicValidateForm: {
-          domains: [{
-            value: '',
-            price:null,
-            des:''
-          }]
-         },
-         itemPosition:null,
-        // form: {
-        //     productName: '电脑',
-        //     taskPrice:'100',
-        //     reward: '5',
-        //     note: '随手1'
-        //  },
+         item:{
+            productName: '顺丰快递',
+            productSize:5,
+            des:'淘宝到货的毛巾架',
+            item_address:{
+              title:'',
+              lng:'',
+              lat:'',
+              detail:''
+            }
+         },        
+        itemList:[],
          temp:{
             receiver_name:'',
             receiver_address:{
               title:'',
-              lng:'121.00',
-              lat:'31.00',
+              lng:'',
+              lat:'',
               detail:''
             },
             receiver_phone:''
          },
-        //  position:[],//marker position
-         receiverData:null,
+         position:[],
+         receiverData:[],
          settedReceiver:[],
          dialogFormVisible: false,
+         pickUp_address:[]
       }      
     },
-    // computed:{
-    //   itemSum:function(){
-    //     var sum=0
-    //     for(var domain in this.dynamicValidateForm.domains)
-    //         return domain.price;
-    //   }
-    // },
     watch: {
       value: function (currentValue) {
         this.showMapComponent = currentValue
@@ -233,43 +274,25 @@
     mounted(){
       this.getReceivers()
       this.getOwnerInfo()
+      
     },
     methods: {
-      /***
-       * 删除物品输入框
-       */
-      removeDomain(item) {
-        var index = this.dynamicValidateForm.domains.indexOf(item)
-        if (index !== -1) {
-          this.dynamicValidateForm.domains.splice(index, 1)
-        }
-      },
-      /***
-       * 添加物品输入框
-       */
-      addDomain() {
-        this.dynamicValidateForm.domains.push({
-          value: '',
-          price:'',
-          key: Date.now()
-        });
-      },
       setPositions(){
           this.position=[{lng: 121.443, lat:31.032},{lng: 121.447, lat:31.032433}]
       },
       /***
        * 地图点击事件。
        */
-      getClickInfo (e) {
-        this.center.lng = e.point.lng
-        this.center.lat = e.point.lat    
-      },
+      // getClickInfo (e) {
+      //   this.center.lng = e.point.lng
+      //   this.center.lat = e.point.lat  
+      // },
       /***
        * 弹窗地图点击事件。
        */
       setReceiverAddress (e) {
-        this.center.lng = e.point.lng
-        this.center.lat = e.point.lat
+        // this.center.lng = e.point.lng
+        // this.center.lat = e.point.lat
         this.temp.receiver_address.lng=e.point.lng
         this.temp.receiver_address.lat=e.point.lat
         this.temp.receiver_address.title=this.keyword
@@ -282,6 +305,26 @@
         this.zoom = e.target.getZoom()
       },
       /***
+       * 发布人位置,代商品位置
+       * todo:获取其它发布人信息并显示在界面上
+       */
+      getOwnerInfo() {
+        let url='http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/User'
+        this.$axios.get(url).then(res=>{
+          for(var i in res.data.User){
+            let owner=res.data.User[i]
+            
+            if(owner.id==this.ownerUID){
+              this.senderName=owner.user_name
+              this.senderPhoneNum=owner.phone_num 
+               console.log(owner)
+            }
+          }
+        })
+      // console.log(this.itemPosition)
+      
+      },
+      /***
       *  查看常用收件人
       */
       getReceivers(){
@@ -290,14 +333,18 @@
         this.$axios.get(url).then(res => {
           for (var i in res.data.Receiver) {
             let receiver = res.data.Receiver[i]
+            // console.log(receiver.user_uid)
             if(receiver.user_uid==this.ownerUID){
+              // console.log("added")
               receiver.receiver_address = JSON.parse(receiver.receiver_address)
               receiverOfCurrentOwner.unshift(receiver)
-            }     
+            }        
           }
           this.receiverData=receiverOfCurrentOwner
-          this.settedReceiver=this.receiverData[0]
+           this.settedReceiver=this.receiverData[0]
               })
+          // console.log("userId:")
+          // console.log(getUserId())  
       },
       /***
        * 选择收件人
@@ -361,53 +408,111 @@
 
       },
       /***
-       * 发布人位置,代商品位置
+       * 继续添加物品
        */
-      getOwnerInfo() {
-        let url='http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/User'
-        this.$axios.get(url).then(res=>{
-          for(var i in res.data.User){
-            // console.log(res.data)
-            let owner=res.data.User[i]            
-            if(owner.id==this.ownerUID){
-              this.itemPosition=owner.current_pos
-               console.log(owner)
-            }
-          }
-        })
-      // console.log(this.itemPosition)     
-      },      
+      addItem() {
+        let currentItem={
+              item_name:this.item.productName,
+              item_address:{
+                lng:this.item.item_address.lng,
+                lat:this.item.item_address.lat,
+                title:this.item.item_address.title
+              },
+              item_des:this.item.des,
+              item_state:"off",
+              item_price:0,
+              item_image:"nan",
+              _task_uid:"nan"
+            }           
+        this.itemList.unshift(currentItem);
+// console.log(currentItem)
+        //清空输入框
+        this.item.productName=''
+        this.item.productSize=''
+        this.item.des=''
+        this.item.item_address.title=''
+        this.item.item_address.lng=''
+        this.item.item_address.lat=''
+        this.item.item_address.detail=''
+console.log(this.itemList)
+      },
+      /**
+       * 地图单击时确定取件位置
+       */
+      setItemAddress(e){
+        this.center.lng = e.point.lng
+        this.center.lat = e.point.lat
+        this.item.item_address.lng=e.point.lng
+        this.item.item_address.lat=e.point.lat
+        this.item.item_address.title=this.keyword
+      },
+      /***
+       * 遗传算法确定取件顺序
+       */
+      addAnotherPickUpAddress(pickUp_address) {
+        
+      const _traceList = this.pickUp_address
+      const _distanceTable = []
+      let _startPoint = null
+      const _startPointDistance = []
+      let _endPoint = null
+      const _endPointDistance = []
+      _startPoint = { lat: -1, lon: 0 }
+      _endPoint = { lat: 6, lon: 9 }
+      _traceList.push({ lat: 0, lon: 0 })
+      _traceList.push({ lat: 0.5, lon: 0 })
+      _traceList.push({ lat: 1, lon: 0 })
+      _traceList.push({ lat: 1.5, lon: 0 })
+      _traceList.push({ lat: 2, lon: 0 })
+      _traceList.push({ lat: 2.5, lon: 0 })
+      _traceList.push({ lat: 3, lon: 0 })
+      _traceList.push({ lat: 3.75, lon: 1 })
+      _traceList.push({ lat: 4.5, lon: 2 })
+      _traceList.push({ lat: 5.25, lon: 3 })
+      _traceList.push({ lat: 6, lon: 4 })
+      _traceList.push({ lat: 6, lon: 4.5 })
+      _traceList.push({ lat: 6, lon: 5 })
+      _traceList.push({ lat: 6, lon: 5.5 })
+      _traceList.push({ lat: 6, lon: 6 })
+      _traceList.push({ lat: 6, lon: 6.5 })
+      _traceList.push({ lat: 6, lon: 7 })
+      _traceList.push({ lat: 6, lon: 7.5 })
+      _traceList.push({ lat: 6, lon: 8 })
+      _traceList.push({ lat: 6, lon: 8.5 })
+      for (let i = 0; i < _traceList.length; i++) {
+        if (_startPoint) {
+          _startPointDistance.push(Math.sqrt(Math.pow(_traceList[i].lat - _startPoint.lat, 2) + Math.pow(_traceList[i].lon - _startPoint.lon, 2)))
+        }
+        if (_endPoint) {
+          _endPointDistance.push(Math.sqrt(Math.pow(_traceList[i].lat - _endPoint.lat, 2) + Math.pow(_traceList[i].lon - _endPoint.lon, 2)))
+        }
+        _distanceTable.push([])
+        for (let j = 0; j < _traceList.length; j++) {
+          _distanceTable[i][j] = Math.sqrt(Math.pow(_traceList[i].lat - _traceList[j].lat, 2) + Math.pow(_traceList[i].lon - _traceList[j].lon, 2))
+        }
+      }
+      this.task_des = traceRecommend(_traceList, _startPointDistance, _endPointDistance, _distanceTable)
+      },
+      /***
+      *task JSONStringify
+      */
       theReplacer(key, value) {
         if(key=== "total_price"){return +value}
         else if(key==="express_fee"){return +value}
         else{return value}
          // return key === "total_price" ? +value : value;
       },
-      itemReplacer(key, value) {
-         return key === "item_price" ? +value : value;
-      },
-      /**
-       * 计算物品总价
-       */
-      itemPriceSum(){
-        let sum=0
-        for(var i in this.dynamicValidateForm.domains){
-         sum=sum+this.dynamicValidateForm.domains[i].price;
-        }          
-        return sum
-      },
       /**
        * 发布物品
        */
       submitItem(response){
-          let itemList=this.dynamicValidateForm.domains;
-          for(var item in itemList){
+          for(var i in this.itemList){
             let completeItem={
-              item_name:itemList[item].value,
-              item_address:this.itemPosition,
-              item_des:itemList[item].des,
+              item_name:this.itemList[i].item_name,
+              item_address:JSON.stringify(this.itemList[i].item_address),
+              item_des:this.itemList[i].des,
               item_state:"off",
-              item_price:itemList[item].price,
+              item_price:this.itemList[i].price,
               item_image:"nan",
               // _task_uid:"nan"
               _task_uid:response.data.id
@@ -421,7 +526,7 @@
                   'Content-Type':'application/json'
                 }
               }).then(res=> {
-              console.log(response);
+              console.log(res);
               console.log("item submitted")
             })
             .catch(function (error) {
@@ -435,10 +540,10 @@
       onSubmit(){
         // let ownerUID=getUserId()
         let newTask={
-                  total_price:this.itemPriceSum(),
-                  express_fee:"0",
+                  total_price:0,
+                  express_fee:this.form.reward,
                   current_state:"released",
-                  task_type:"purchase",
+                  task_type:"express",
                   task_des:this.form.note,
                   task_comment:"nan",
                   _owner_uid:getUserId(),
@@ -455,7 +560,7 @@
                   payment_state:"nan"
                 }
 
-     console.log(JSON.stringify(newTask,this.theReplacer));         
+     console.log(JSON.stringify(newTask,this.theReplacer));           
         this.$axios(
               {
                 url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task', 
@@ -465,28 +570,21 @@
                   'Content-Type':'application/json'
                 }
               })
-        // let url="http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task"  
-        // this.$axios.post(url,JSON.stringify(newTask,this.theReplacer))
-        // 不能用.then(function(response){ 否则this.submitItem()会报this undefined
               .then(res=> {
-                console.log("task posted")
-                // console.log(response)
-              // console.log(response.data.id);
-              //发布物品
-              this.submitItem(res)
+                console.log("Task posted");
+                this.submitItem(res)             
             })
             .catch(function (error) {
               console.log(error);
-            });      
-      } 
-      
+            });
+      }
     }
   }
 </script>
  
 <style scoped>
 .serachinput{
-  width: 300px;
+  width: 400px;
   box-sizing: border-box;
   padding: 9px;
   border: 1px solid #dddee1;
