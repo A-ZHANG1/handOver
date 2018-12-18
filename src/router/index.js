@@ -56,17 +56,17 @@ export const constantRouterMap = [
       meta: { title: '取送件', icon: 'lock', roles: ['admin', 'editor'] }
     }]
   },
-  {
-    path: '/dynamicForm',
-    component: Layout,
-    redirect: '/dynamicForm',
-    name: '/dynamicForm',
-    children: [{
-      path: 'dynamicForm',
-      component: () => import('@/views/dashboard/admin/dynamicForm'),
-      meta: { title: '测试', icon: 'lock', roles: ['admin', 'editor'] }
-    }]
-  },
+  // {
+  //   path: '/dynamicForm',
+  //   component: Layout,
+  //   redirect: '/dynamicForm',
+  //   name: '/dynamicForm',
+  //   children: [{
+  //     path: 'dynamicForm',
+  //     component: () => import('@/views/dashboard/admin/dynamicForm'),
+  //     meta: { title: '测试', icon: 'lock', roles: ['admin', 'editor'] }
+  //   }]
+  // },
   {
     path: '/userCentre',
     component: Layout,

@@ -6,7 +6,7 @@
    :position 设置在data return 中监听改变
 -->
 <template>
-  <div style="padding-top:50px; border:1px solid LightGrey;width:1300px;">
+  <div style="padding-top:50px; border:1px solid LightGrey;width:980px;">
     <el-form label-width="120px" v-model="showMapComponent">
 
 <!-- 动态添加商品和位置的表格 -->
@@ -60,20 +60,21 @@
 </el-form>
 
 <!-- 选择收件人 -->
-      <el-form-item label="收件人" size="mini"  required="true">           
-      <div style="padding-button:5px; border:1px solid LightGrey;width:820px;">
+      <el-form-item label="收件人"  required="true">           
+      <div style="padding-button:5px; border:0px solid LightGrey;width:820px;">
         <el-collapse :according=true>
           <el-collapse-item>
           <!-- <el-collapse-item :title="settedReceiver.receiver_name"> -->
             <template slot="title"><div style="font-size:28px;color:gray;">{{settedReceiver.receiver_name}} @ {{settedReceiver.receiver_address.title}}</div>
             </template>
             <!-- v-for展开常用收件人 -->
+            <el-row>
             <el-col>
             <el-table :data="receiverData" highlight-current-row>
               <el-table-column prop="receiver_name" width="80"/>
               <el-table-column prop="receiver_address.title" width="380"/>
-              <el-table-column prop="receiver_address.detail" width="180"/>
-              <el-table-column prop="receiver_phone" width="180"/>
+              <el-table-column prop="receiver_address.detail" width="80"/>
+              <el-table-column prop="receiver_phone" width="110"/>
                 <el-table-column>
                   <template scope="scope">
                     <el-button type="info" icon="el-icon-check" circle @click="setReceiver(scope.row.receiver_name)"></el-button>
@@ -81,11 +82,14 @@
                 </el-table-column> 
             </el-table>
             </el-col>
-            <el-col>
-            <el-card>
-              <el-button type="success" @click="showDialog()">添加</el-button>
-            </el-card>  
-            </el-col>      
+            </el-row>
+            <el-row>
+            <el-col :span="10" :offset="10" >
+            <!-- <el-card> -->
+              <el-button type="success" @click="showDialog()" icon="el-icon-circle-plus-outline" size="medium" style="padding-top:5px;">新建收件人</el-button>
+            <!-- </el-card>   -->
+            </el-col>    
+            </el-row>  
           </el-collapse-item>
         </el-collapse>
         </div>
@@ -104,7 +108,7 @@
 <!-- 添加收件人 弹窗-->
   <el-dialog  title="添加收件人" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm"  :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
-        {{temp.receiver_name}}{{temp.receiver_address}}{{temp.receiver_tel}}
+        <!-- {{temp.receiver_name}}{{temp.receiver_address}}{{temp.receiver_tel}} -->
         <el-form-item label="姓名">
             <el-input v-model="temp.receiver_name"/>          
         </el-form-item>
@@ -117,14 +121,17 @@
       @moving="syncCenterAndZoom" 
       @moveend="syncCenterAndZoom" 
       @zoomend="syncCenterAndZoom">
+      <!-- 地图显示 -->
         <bm-view style="width: 100%; height:500px;"></bm-view>
-        
+        <!-- 自动补全 -->
         <bm-control :offset="{width: '10px', height: '10px'}">
           <bm-auto-complete v-model="keyword" :sugStyle="{zIndex: 999999}">
             <input type="text" placeholder="如：闵行交大学生西67舍" class="serachinput">
           </bm-auto-complete>
         </bm-control>
-
+        <!-- 搜索功能 -->
+        <bm-local-search :keyword="keyword" :auto-viewport="true" style="width:0px;height:0px;overflow: hidden;"></bm-local-search>
+        <!-- 单击取点功能 -->
         <bm-marker :position="{lng:temp.receiver_address.lng,lat:temp.receiver_address.lat}" >
         </bm-marker>
       </baidu-map>
