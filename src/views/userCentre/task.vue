@@ -1,7 +1,7 @@
 <template>
   <div style="padding-top:50px; border:0px solid red">
     <Modal>
-      <el-tabs type="border-card">
+      <el-tabs v-if="myTask" type="border-card">
         <el-tab-pane label="基本信息">
           <baidu-map v-if="traces.length > 0"
                      v-bind:style="mapStyle"
@@ -136,7 +136,7 @@
                 {{ scope.row.trace_pos['lng'] }}
               </template>
             </el-table-column>
-            <el-table-column label="维度">
+            <el-table-column label="纬度">
               <template slot-scope="scope">
                 {{ scope.row.trace_pos['lat'] }}
               </template>
@@ -172,7 +172,7 @@
 </template>
 
 <script>
-import { BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker, BmPointCollection } from 'vue-baidu-map'
+import { BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker, BmPointCollection, BmPolyline } from 'vue-baidu-map'
 import { translateState } from '../../utils/translate'
 import { datePrototypeFormat } from '../../utils/dateFormat'
 import QRCode from 'qrcode'
@@ -187,7 +187,8 @@ export default {
     BmAutoComplete,
     BmLocalSearch,
     BmMarker,
-    BmPointCollection
+    BmPointCollection,
+    BmPolyline
   },
   data: function() {
     return {
@@ -273,6 +274,7 @@ export default {
                   trace.trace_pos = JSON.parse(trace.trace_pos)
                   this.tracesPos.push(trace.trace_pos)
                 }
+                console.log(this.tracesPos)
                 if (this.traces.length > 0) {
                   this.startPos = [this.traces[0].trace_pos]
                 }
