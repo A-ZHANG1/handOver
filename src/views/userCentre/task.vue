@@ -22,7 +22,7 @@
             <bm-point-collection :points="startPos" shape="BMAP_POINT_SHAPE_STAR" color="teal" size="BMAP_POINT_SIZE_HUGE"/>
             <bm-polyline :path="tracesPos"/>
           </baidu-map>
-          <div v-if="mapMessagePad" style="width: 300px; background: #dfdfdf; position: absolute; top: 20px; right: 20px;">
+          <div v-if="mapMessagePad" style="width: 300px; background: #ffffff; position: absolute; top: 20px; right: 20px; padding: 5px; border-radius: 5px; box-shadow:2px 2px 10px #999;">
             <pre style="margin: 2px; white-space: pre-wrap; word-wrap: break-word;">{{ mapMessagePad }}</pre>
           </div>
 
