@@ -181,12 +181,25 @@
   <!-- </el-tab-pane>
 </el-tabs>  -->
 
-<!-- 添加收件人 弹窗-->
-  <el-dialog  title="添加收件人" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm"  :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
+          <el-form-item label="备注">
+            <el-col :span=12>
+              <el-input v-model="form.task_des" type="textarea"/>
+            </el-col>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="onSubmit">发布</el-button>
+          </el-form-item>
+        </el-form>
+      </el-tab-pane>
+    </el-tabs>
+
+    <!-- 添加收件人 弹窗-->
+    <el-dialog title="添加收件人" :visible.sync="dialogFormVisible">
+      <el-form ref="dataForm" :model="temp" label-position="left" label-width="90px"
+               style="width: 400px; margin-left:50px;">
         <!-- {{temp.receiver_name}}{{temp.receiver_address}}{{temp.receiver_tel}} -->
         <el-form-item label="姓名">
-            <el-input v-model="temp.receiver_name"/>          
+          <el-input v-model="temp.receiver_name"/>
         </el-form-item>
         <el-form-item label="地址">
           <baidu-map v-bind:style="mapStyle" class="bm-view" ak="K73Dbc6A1dKd3dLI0ikN5p83u5rKnGmy"
@@ -206,15 +219,15 @@
           </bm-auto-complete>
         </bm-control>
 
-        <bm-marker :position="{lng:temp.receiver_address.lng,lat:temp.receiver_address.lat}" >
-        </bm-marker>
-      </baidu-map>
+            <bm-marker :position="{lng:temp.receiver_address.lng,lat:temp.receiver_address.lat}">
+            </bm-marker>
+          </baidu-map>
         </el-form-item>
         <el-form-item label="详细地址">
-            <el-input placeholder="如：5310室" v-model="temp.receiver_address.detail"/>          
+          <el-input placeholder="如：5310室" v-model="temp.receiver_address.detail"/>
         </el-form-item>
         <el-form-item label="电话">
-            <el-input v-model="temp.receiver_phone"/>          
+          <el-input v-model="temp.receiver_phone"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -222,17 +235,26 @@
         <el-button type="primary" @click="createReceiver">确认</el-button>
       </div>
     </el-dialog>
-  </div>  
+  </div>
 </template>
 <script>
-  import {BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker,BmPointCollection} from 'vue-baidu-map'
+  import {
+    BaiduMap,
+    BmControl,
+    BmView,
+    BmAutoComplete,
+    BmLocalSearch,
+    BmMarker,
+    BmPointCollection
+  } from 'vue-baidu-map'
   import { getUserId } from '@/utils/auth'
-  import moment from "moment"
+  import moment from 'moment'
   import { traceRecommend } from '@/utils/TraceRecommend'
 
-// const position=[{lng: 121.443, lat:31.032},{lng: 122, lat:28}]
+  // const position=[{lng: 121.443, lat:31.032},{lng: 122, lat:28}]
 
   export default {
+    name: 'paotui',
     components: {
       BaiduMap,
       BmControl,
@@ -242,7 +264,7 @@
       BmMarker,
       BmPointCollection
     },
-    data: function () {
+    data: function() {
       return {
         
         rewardShow:false,
@@ -258,7 +280,7 @@
           width: '100%',
           height: this.mapHeight + 'px'
         },
-        center: {lng: 121.443, lat:31.032},
+        center: { lng: 121.443, lat: 31.032 },
         zoom: 15,
         form: { 
             reward:0,          
@@ -297,7 +319,7 @@
       }      
     },
     watch: {
-      value: function (currentValue) {
+      value: function(currentValue) {
         this.showMapComponent = currentValue
         if (currentValue) {
           this.keyword = ''
@@ -311,35 +333,36 @@
         default: 500
       }
     },
-    mounted(){
+    mounted() {
       this.getReceivers()
       this.getOwnerInfo()
-      
+
     },
+    computed: {},
     methods: {
-      setPositions(){
-          this.position=[{lng: 121.443, lat:31.032},{lng: 121.447, lat:31.032433}]
+      setPositions() {
+        this.position = [{ lng: 121.443, lat: 31.032 }, { lng: 121.447, lat: 31.032433 }]
       },
       /***
        * 地图点击事件。
        */
       // getClickInfo (e) {
       //   this.center.lng = e.point.lng
-      //   this.center.lat = e.point.lat  
+      //   this.center.lat = e.point.lat
       // },
       /***
        * 弹窗地图点击事件。
        */
-      setReceiverAddress (e) {
+      setReceiverAddress(e) {
         // this.center.lng = e.point.lng
         // this.center.lat = e.point.lat
-        this.temp.receiver_address.lng=e.point.lng
-        this.temp.receiver_address.lat=e.point.lat
-        this.temp.receiver_address.title=this.keyword
+        this.temp.receiver_address.lng = e.point.lng
+        this.temp.receiver_address.lat = e.point.lat
+        this.temp.receiver_address.title = this.keyword
         // console.log(this.temp.receiver_address)
       },
-      syncCenterAndZoom (e) {
-        const {lng, lat} = e.target.getCenter()
+      syncCenterAndZoom(e) {
+        const { lng, lat } = e.target.getCenter()
         this.center.lng = lng
         this.center.lat = lat
         this.zoom = e.target.getZoom()
@@ -349,34 +372,34 @@
        * todo:获取其它发布人信息并显示在界面上
        */
       getOwnerInfo() {
-        let url='http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/User'
-        this.$axios.get(url).then(res=>{
-          for(var i in res.data.User){
-            let owner=res.data.User[i]
-            
-            if(owner.id==this.ownerUID){
-              this.senderName=owner.user_name
-              this.senderPhoneNum=owner.phone_num 
-               console.log(owner)
+        let url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/User'
+        this.$axios.get(url).then(res => {
+          for (var i in res.data.User) {
+            let owner = res.data.User[i]
+
+            if (owner.id == this.ownerUID) {
+              this.senderName = owner.user_name
+              this.senderPhoneNum = owner.phone_num
+              console.log(owner)
             }
           }
         })
-      // console.log(this.itemPosition)
-      
+        // console.log(this.itemPosition)
+
       },
       /***
-      *  查看常用收件人
-      */
-      getReceivers(){
-        let url='http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Receiver'
-        let receiverOfCurrentOwner=[]
+       *  查看常用收件人
+       */
+      getReceivers() {
+        let url = 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Receiver'
+        let receiverOfCurrentOwner = []
         this.$axios.get(url).then(res => {
           for (var i in res.data.Receiver) {
             let receiver = res.data.Receiver[i]
             if(receiver.user_uid==this.ownerUID){
               receiver.receiver_address = JSON.parse(receiver.receiver_address)
               receiverOfCurrentOwner.unshift(receiver)
-            }        
+            }
           }
           this.receiverData=receiverOfCurrentOwner
            this.settedReceiver=this.receiverData[0]
@@ -399,44 +422,44 @@
       //   let url='http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Receiver'
       // this.$axios.delete(url+"id")
       // },
-      showDialog(){
-        this.dialogFormVisible=true
+      showDialog() {
+        this.dialogFormVisible = true
       },
       /***
        * 添加收件人
        */
-      createReceiver(){
-        let newReceiver={
-                user_uid:this.ownerUID,
-                receiver_name:this.temp.receiver_name,
-                receiver_phone:this.temp.receiver_phone,
-                receiver_address:JSON.stringify(this.temp.receiver_address)
-            }
+      createReceiver() {
+        let newReceiver = {
+          user_uid: this.ownerUID,
+          receiver_name: this.temp.receiver_name,
+          receiver_phone: this.temp.receiver_phone,
+          receiver_address: JSON.stringify(this.temp.receiver_address)
+        }
         // console.log(this.temp)
         this.receiverData.unshift(this.temp)
         this.$axios(
-              {
-                url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Receiver', 
-                method:"post",
-                data:JSON.stringify(newReceiver),
-                headers:{
-                  'Content-Type':'application/json'
-                }
-              })
-              .then(function (response) {
-              console.log(response);
-              // console.log("posted");
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
+          {
+            url: 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Receiver',
+            method: 'post',
+            data: JSON.stringify(newReceiver),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(function(response) {
+            console.log(response)
+            // console.log("posted");
+          })
+          .catch(function(error) {
+            console.log(error)
+          })
         this.dialogFormVisible = false
         this.$notify({
-              title: '成功',
-              message: '创建成功',
-              type: 'success',
-              duration: 2000
-            })
+          title: '成功',
+          message: '创建成功',
+          type: 'success',
+          duration: 2000
+        })
 
       },
       /***
@@ -459,14 +482,14 @@
         this.itemList.unshift(currentItem);
 // console.log(currentItem)
         //清空输入框
-        this.item.productName=''
-        this.item.productSize=''
-        this.item.des=''
-        this.item.item_address.title=''
-        this.item.item_address.lng=''
-        this.item.item_address.lat=''
-        this.item.item_address.detail=''
-console.log(this.itemList)
+        this.item.productName = ''
+        this.item.productSize = ''
+        this.item.des = ''
+        this.item.item_address.title = ''
+        this.item.item_address.lng = ''
+        this.item.item_address.lat = ''
+        this.item.item_address.detail = ''
+        console.log(this.itemList)
       },
         //强制重新生成DOM
       $showReward(){
@@ -475,12 +498,12 @@ console.log(this.itemList)
       /**
        * 地图单击时确定取件位置
        */
-      setItemAddress(e){
+      setItemAddress(e) {
         this.center.lng = e.point.lng
         this.center.lat = e.point.lat
-        this.item.item_address.lng=e.point.lng
-        this.item.item_address.lat=e.point.lat
-        this.item.item_address.title=this.keyword
+        this.item.item_address.lng = e.point.lng
+        this.item.item_address.lat = e.point.lat
+        this.item.item_address.title = this.keyword
       },
       /***
        * 遗传算法确定取件顺序,及在此基础上确定悬赏金
@@ -520,13 +543,17 @@ console.log(this.itemList)
       console.log(this.orderedItemList)
       },
       /***
-      *task JSONStringify
-      */
+       *task JSONStringify
+       */
       theReplacer(key, value) {
-        if(key=== "total_price"){return +value}
-        else if(key==="express_fee"){return +value}
-        else{return value}
-         // return key === "total_price" ? +value : value;
+        if (key === 'total_price') {
+          return +value
+        } else if (key === 'express_fee') {
+          return +value
+        } else {
+          return value
+        }
+        // return key === "total_price" ? +value : value;
       },
       /**
        * 发布物品
@@ -564,7 +591,7 @@ console.log(this.itemList)
       /***
        * 表单提交事件
        */
-      onSubmit(){
+      onSubmit() {
         // let ownerUID=getUserId()
         let newTask={
                   total_price:0,
@@ -587,42 +614,41 @@ console.log(this.itemList)
                   payment_state:""
                 }
 
-     console.log(JSON.stringify(newTask,this.theReplacer));           
         this.$axios(
-              {
-                url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task', 
-                method:"post",
-                data:JSON.stringify(newTask,this.theReplacer),
-                headers:{
-                  'Content-Type':'application/json'
-                }
-              })
-              .then(res=> {
-                console.log("Task posted");
-                this.submitItem(res)             
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
+          {
+            url: 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task',
+            method: 'post',
+            data: JSON.stringify(newTask),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(res => {
+            console.log('Task posted')
+            this.submitItem(res)
+          })
+          .catch(function(error) {
+            console.log(error)
+          })
       }
     }
   
 </script>
- 
+
 <style scoped>
-.serachinput{
-  width: 400px;
-  box-sizing: border-box;
-  padding: 9px;
-  border: 1px solid #dddee1;
-  line-height: 20px;
-  font-size: 16px;
-  height: 38px;
-  color: #333;
-  position: relative;
-  border-radius: 4px;
-  -webkit-box-shadow: #666 0px 0px 10px;
-  -moz-box-shadow: #666 0px 0px 10px;
-  box-shadow: #666 0px 0px 10px;
-}
+  .serachinput {
+    width: 400px;
+    box-sizing: border-box;
+    padding: 9px;
+    border: 1px solid #dddee1;
+    line-height: 20px;
+    font-size: 16px;
+    height: 38px;
+    color: #333;
+    position: relative;
+    border-radius: 4px;
+    -webkit-box-shadow: #666 0px 0px 10px;
+    -moz-box-shadow: #666 0px 0px 10px;
+    box-shadow: #666 0px 0px 10px;
+  }
 </style>
