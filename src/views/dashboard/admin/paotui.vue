@@ -8,7 +8,7 @@
 <template>
   <div style="padding-top:50px; border:1px solid lightGrey;width=980px;">
 
-   {{ JSON.stringify(testText) }}
+   <!-- {{ JSON.stringify(testText) }} -->
 
     <el-form ref="item" :model="item" label-width="120px" v-model="showMapComponent">
 <!-- 添加待取件物品 -->
@@ -73,18 +73,11 @@
               <el-table-column prop="item_name" label="物品名" width="180"/>
               <el-table-column prop="item_address.title" label="地址" width="380"/>
               <el-table-column prop="senderPhoneNum" label="发件人电话" width="180"/>
-              <!-- <el-table-column prop="receiver_phone" width="180"/> -->
-                <!-- <el-table-column>
-                  <template scope="scope">
-                    <el-button type="info" icon="el-icon-goods" circle></el-button>
-                  </template>
-                </el-table-column>  -->
       </el-table>   
    </el-form-item>
-   <el-form-item>
+   <!-- <el-form-item>
      <el-button @click="getPickUpOrder">顺序</el-button>
-
-   </el-form-item>
+   </el-form-item> -->
 
 <!-- 任务悬赏金设置 -->
   <el-form-item label="悬赏金" placeholder="系统预估费用" style="width: 900px;">
@@ -97,7 +90,7 @@
         </el-col>
         </el-row>
         <el-row>
-          <span v-if="rewardShow">系统推荐悬赏金：￥ {{getOwnerInfo()}}</span>
+          <span v-if="rewardShow">系统推荐悬赏金：￥ {{calculateReward()}}</span>
         </el-row>
   </el-form-item>
 
@@ -116,7 +109,7 @@
         <el-collapse :according=true>
           <el-collapse-item>
           <!-- {{settedReceiver.receiver_name}} @ {{settedReceiver.receiver_address.title}} -->
-            <template slot="title"><div style="font-size:16px;color:lightGray;">地址簿</div>
+            <template slot="title"><div style="font-size:16px;color:lightGray;">常用收件人列表</div>
             </template>
             <!-- v-for展开常用收件人 -->
             <el-row>
@@ -313,8 +306,7 @@
     },
     mounted(){
       this.getReceivers()
-      this.getOwnerInfo()
-      
+      this.getOwnerInfo()  
     },
     methods: {
       setPositions(){
@@ -372,7 +364,7 @@
         let receiverOfCurrentOwner=[]
         this.$axios.get(url).then(res => {
           for (var i in res.data.Receiver) {
-            let receiver = res.data.Receiver[i]
+            let receiver = res.data.Receiver[i] 
             if(receiver.user_uid==this.ownerUID){
               receiver.receiver_address = JSON.parse(receiver.receiver_address)
               receiverOfCurrentOwner.unshift(receiver)
@@ -489,15 +481,15 @@ console.log(this.itemList)
 
       const _traceList = []
       const _distanceTable = []
-      let _startPoint = this.owner//
+      let _startPoint = null
       const _startPointDistance = []
       let _endPoint = null
       const _endPointDistance = []
       _startPoint={lat:this.itemList[0].item_address.lat,lon:this.itemList[0].item_address.lng}
-      // _startPoint = { lat: -1, lon: 0 }
+    
       _endPoint = { lat: this.settedReceiver.receiver_address.lat, lon: this.settedReceiver.receiver_address.lng }
       // _endPoint = { lat: 6, lon: 9 }
-      for(var i in this.itemList){
+      for(let i = 1; i < this.itemList.length; i++){
         _traceList.push({lat:this.itemList[i].item_address.lat,lon:this.itemList[i].item_address.lng})
       }
       for (let i = 0; i < _traceList.length; i++) {
@@ -516,10 +508,21 @@ console.log(this.itemList)
       
       for(var i in this.testText.trace){
           this.orderedItemList.unshift(this.itemList[this.testText.trace[i]])
-      }
-      console.log(this.orderedItemList)
+       }
       },
-      /***
+      /*
+      *计算费用
+      ***/
+     calculateReward(){
+      // console.log(this.orderedItemList[0].item_address)
+      var distance=0
+      for(let k = 1; k < this.orderedItemList.length; k++){
+            distance=distance+Math.sqrt(Math.pow(this.orderedItemList[k].item_address.lat -this.orderedItemList[k-1].item_address.lat, 2) + Math.pow(this.orderedItemList[k].item_address.lng - this.orderedItemList[k-1].item_address.lng, 2))
+      }
+      console.log(distance)
+      return (10+1.8*distance).toFixed(2) 
+     },
+     /*  
       *task JSONStringify
       */
       theReplacer(key, value) {
@@ -532,7 +535,8 @@ console.log(this.itemList)
        * 发布物品
        */
       submitItem(response) {
-        // for (var item in this.orderedItemList) {
+        var requestList=[]
+        for (var item in this.orderedItemList) {
           let completeItem = {
             item_name: this.orderedItemList[0].value,
             item_address: this.itemPosition,
@@ -541,25 +545,18 @@ console.log(this.itemList)
             item_price: this.orderedItemList[0].price,
             item_image: '',
             _task_uid: response.data.id
-          }
-          this.orderedItemList.shift()
-          console.log("here")
-          this.$axios({
+          }       
+          requestList.unshift(this.$axios({
             url: 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Item',
             method: 'post',
             data: JSON.stringify(completeItem, this.itemReplacer),
-            headers: {
-              'Content-Type': 'application/json'
-            }      
-            }).then(res => {
-              if(this.orderedItemList.size!=0){
-                 return submitItem(res.data._task_uid)
-              }              
-            console.log('item submitted')
+            headers: {'Content-Type': 'application/json'}      
+            })
+          )}
+          this.$axios.all(requestList).then(res => {           
+              console.log('item submitted') 
           }).catch(function(error) {
-              console.log(error)
-            })  
-          }
+              console.log(error)})  
       },
       /***
        * 表单提交事件
@@ -606,7 +603,7 @@ console.log(this.itemList)
             });
       }
     }
-  
+  }
 </script>
  
 <style scoped>

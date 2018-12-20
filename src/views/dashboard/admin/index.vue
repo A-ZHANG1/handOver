@@ -469,7 +469,7 @@
         })
         // console.log("current position:")
         // console.log(this.itemPosition)  
-        return this.recommandReward.toFixed(1)                   
+        return this.recommandReward.toFixed(2)                   
       },      
       theReplacer(key, value) {
         if(key=== "total_price"){return +value}
