@@ -17,30 +17,31 @@
       <!-- :label="'商品名' + index" -->
       <!-- :key="domain.key" -->
   <el-form-item><div style="font-size:26px;color:gray;">代购任务</div></el-form-item>
+
+<div style="margin:0px 0px 20px 110px;padding:0;width:820px;height:1px;background-color:lightGrey;overflow:hidden;"></div>
+
   <el-form-item
     v-for="(domain, index) in dynamicValidateForm.domains"
     :key="domain.key"
     :prop="'domains.' + index + '.value'"
     style="width: 900px;"
+    :label="'代购物品' + (index+1)" 
   >
-  <el-row :gutter="20">
+  <el-row :gutter="32">
   <el-col :span="6">
-    <el-input v-model="domain.value" placeholder="品名" label="物品信息"></el-input>
+    <el-input v-model="domain.value" placeholder="品名"></el-input>
   </el-col>
   <el-col :span="4">
-    <el-input v-model.number="domain.price" placeholder="预估价格" label="物品信息"></el-input>
+    <el-input v-model.number="domain.price" placeholder="预估价格"></el-input>
   </el-col>
   <el-col :span="10">
     <el-input v-model="domain.des" placeholder="商品描述"></el-input>
   </el-col>
-    <!-- <el-col :span="4">
-    <el-input-number v-model="domain.weight" placeholder="重量"></el-input-number>
-  </el-col> -->
   <el-col :span="2">
-      <el-button v-if="index!=0" @click="removeDomain(domain)" icon="el-icon-minus" type="danger" circle plain></el-button>
+      <el-button v-if="index!=0" @click="removeDomain(domain)" icon="el-icon-minus" type="" circle plain></el-button>
   </el-col>
   <el-col :span="2">
-      <el-button v-if="index===0" @click="addDomain" icon="el-icon-plus" type="success" circle plain></el-button>
+      <el-button v-if="index===0" @click="addDomain" icon="el-icon-plus" type="" circle plain></el-button>
     </el-col>
   </el-row>
   </el-form-item>
@@ -50,26 +51,11 @@
   <el-row>
     <el-col :offset="0">
     <!-- <div v-for="(domain, index) in dynamicValidateForm.domains" :key="domain.key">{{domain.price}}</div> -->
-      <div  style="font-size:16px;color:gray;align:left">预估总价:{{itemPriceSum()}}</div>
+      <div  style="font-size:16px;color:gray;align:left;padding-left:18px;">预估总价:{{itemPriceSum()}}</div>
     </el-col>
   </el-row>
 </el-form-item>
 </el-form>
-
-<!-- 系统推荐悬赏金 -->
-  <el-form-item label="悬赏金" placeholder="系统预估费用" style="width: 900px;">
-        <el-row>
-        <el-col :span="4">
-          <el-input v-model.number="form.reward"/>
-        </el-col>
-        <el-col :span="2" :offset="1">
-          <el-button @click="$showReward()">推荐</el-button>
-        </el-col>
-        </el-row>
-        <el-row>
-          <span v-if="rewardShow">系统推荐悬赏金：￥ {{getOwnerInfo()}}</span>
-        </el-row>
-      </el-form-item>
 
 <!-- 选择收件人 -->
       <el-form-item label="收件人"  required="true">           
@@ -106,6 +92,21 @@
         </el-collapse> 
         </div>
       </el-form-item> 
+
+<!-- 系统推荐悬赏金 -->
+  <el-form-item label="悬赏金" placeholder="系统预估费用" style="width: 900px;">
+        <el-row>
+        <el-col :span="4">
+          <el-input v-model.number="form.reward"/>
+        </el-col>
+        <el-col :span="2" :offset="1">
+          <el-button @click="$showReward()">推荐</el-button>
+        </el-col>
+        </el-row>
+        <el-row>
+          <span v-if="rewardShow">系统推荐悬赏金：￥ {{getOwnerInfo()}}</span>
+        </el-row>
+  </el-form-item>
 
       <el-form-item label="任务时间" placeholder="任务开始时间">
         <el-row>
