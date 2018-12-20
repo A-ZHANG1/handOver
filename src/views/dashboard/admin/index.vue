@@ -44,20 +44,13 @@
     </el-col>
   </el-row>
   </el-form-item>
- 
-<!-- 新增按键 -->
-  <!-- <el-form-item>
-    <el-col :span="10" :offset="10">
-      <el-button @click="addDomain" icon="el-icon-plus" type="success" circle plain></el-button>
-    </el-col>
-  </el-form-item> -->
 
 <!-- 显示总价 -->
 <el-form-item>
   <el-row>
-    <el-col :offset="20">
+    <el-col :offset="0">
     <!-- <div v-for="(domain, index) in dynamicValidateForm.domains" :key="domain.key">{{domain.price}}</div> -->
-      <div  style="font-size:16px;color:gray;align:right">预估总价:{{itemPriceSum()}}</div>
+      <div  style="font-size:16px;color:gray;align:left">预估总价:{{itemPriceSum()}}</div>
     </el-col>
   </el-row>
 </el-form-item>
@@ -69,7 +62,7 @@
         <el-col :span="4">
           <el-input v-model.number="form.reward"/>
         </el-col>
-        <el-col :span="2">
+        <el-col :span="2" :offset="1">
           <el-button @click="$showReward()">推荐</el-button>
         </el-col>
         </el-row>
@@ -113,15 +106,10 @@
         </el-collapse> 
         </div>
       </el-form-item> 
-      <!-- <el-form-item>
-            
-      </el-form-item>   -->
-      <el-form-item label="备注">
-        <el-col :span=23>
-          <el-input v-model="form.note" type="textarea"/>
-      </el-col>
-      </el-form-item>
-      <el-form-item label="任务开始时间" placeholder="任务开始时间">
+
+      <el-form-item label="任务时间" placeholder="任务开始时间">
+        <el-row>
+          <el-col :span="3">
         <el-date-picker
           v-model="form.start_time"
           type="datetime"
@@ -129,8 +117,8 @@
           align="right"
           :picker-options="pickerOptions1">
         </el-date-picker>
-      </el-form-item>
-      <el-form-item label="任务截止时间" placeholder="任务截止时间">
+</el-col>
+      <el-col :span="3" :offset="4">
         <el-date-picker
           v-model="form.end_time"
           type="datetime"
@@ -138,11 +126,23 @@
           align="right"
           :picker-options="pickerOptions1">
         </el-date-picker>
+      </el-col>
+        </el-row>
       </el-form-item>
+      <!-- <el-form-item label="任务截止时间" placeholder="任务截止时间"> -->
+        
+      <!-- </el-form-item> -->
+
+      <el-form-item label="备注">
+        <el-col :span=23>
+          <el-input v-model="form.note" type="textarea"/>
+      </el-col>
+      </el-form-item>
+
       <el-form-item>
         <el-button type="primary" @click="onSubmit">发布</el-button>
-        <!-- <el-button @click="onCancel">取消</el-button> -->
       </el-form-item>
+
     </el-form>
 
 <!-- 添加收件人 弹窗-->

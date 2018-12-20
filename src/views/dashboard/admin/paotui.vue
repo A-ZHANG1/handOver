@@ -12,12 +12,12 @@
 
     <el-form ref="item" :model="item" label-width="120px" v-model="showMapComponent">
 <!-- 添加待取件物品 -->
-   <el-form-item><div style="font-size:26px;color:gray;">物品信息</div></el-form-item>
+   <el-form-item><div style="font-size:26px;color:gray;">取送件</div></el-form-item>
    <!-- 设置el-form-item style=width:可以不自适应页面宽度-->
       <el-form-item style="width: 900px;">
       <el-row>
         <el-col :span="16">
-          <el-input v-model="item.productName" placeholder="物品名称">
+          <el-input v-model="item.productName" placeholder="请填写物品名称">
           </el-input>
         </el-col>
         <el-col :offset="2" :span="6">
@@ -68,9 +68,10 @@
   </el-form-item>
 
 <!-- 显示当前物品信息 -->
-   <el-form-item><div style="font-size:26px;color:gray;">已添加物品</div>
+   <el-form-item label="已添加物品">
+     <!-- <div style="font-size:26px;color:gray;">已添加物品</div> -->
       <el-table :data="itemList" highlight-current-row style="width:900px">
-              <el-table-column prop="item_name" label="物品名" width="180"/>
+              <el-table-column prop="item_name" label="名称" width="180"/>
               <el-table-column prop="item_address.title" label="地址" width="380"/>
               <el-table-column prop="senderPhoneNum" label="发件人电话" width="180"/>
       </el-table>   
@@ -85,7 +86,7 @@
         <el-col :span="4">
           <el-input v-model.number="form.reward"/>
         </el-col>
-        <el-col :span="2">
+        <el-col :span="2" :offset="1">
           <el-button @click="$showReward()">推荐</el-button>
         </el-col>
         </el-row>
@@ -100,7 +101,7 @@
       <el-row>
 
         <el-col >
-            <el-button @click="showDialog()" icon="el-icon-circle-plus-outline" plain>新建</el-button>
+            <el-button @click="showDialog()" icon="el-icon-circle-plus-outline" plain type="success">新建</el-button>
         </el-col>              
       
       <el-col>
@@ -149,7 +150,7 @@
           :picker-options="pickerOptions1">
         </el-date-picker>
       </el-col>
-      <el-col :span="3" :offset="1">
+      <el-col :span="3" :offset="4">
         <el-date-picker
           v-model="form.end_time"
           type="datetime"
@@ -163,7 +164,7 @@
      
       <el-form-item label="备注" style="width: 900px;">
         <el-col :span=24>
-          <el-input v-model="form.note" type="textarea"/>
+          <el-input v-model="form.note" type="textarea" placeholder="特殊要求"/>
       </el-col>
       </el-form-item>
       <el-form-item>
@@ -255,14 +256,14 @@
         zoom: 15,
         form: { 
             reward:0,          
-            note: '请填写任务备注信息',
+            note: '',
             start_time: '',
             end_time: ''
          },
          item:{
-            productName: '顺丰快递',
-            productSize:5,
-            des:'淘宝到货的毛巾架',
+            productName: '',
+            productSize:null,
+            des:'',
             item_address:{
               title:'',
               lng:'',
