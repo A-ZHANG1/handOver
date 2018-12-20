@@ -1,7 +1,7 @@
 <template>
   <div style="padding-top:50px; border:0px solid red">
     <Modal>
-      <el-tabs v-if="myTask" type="border-card">
+      <el-tabs type="border-card">
         <el-tab-pane label="基本信息">
           <baidu-map v-bind:style="mapStyle"
                      :center="center"
@@ -21,7 +21,7 @@
             <bm-point-collection :points="startPos" shape="BMAP_POINT_SHAPE_STAR" color="teal" size="BMAP_POINT_SIZE_HUGE"/>
             <bm-polyline :path="tracesPos"/>
           </baidu-map>
-          <div v-if="mapMessagePad" style="width: 300px; background: #ffffff; position: absolute; top: 20px; right: 20px; padding: 5px; border-radius: 5px; box-shadow:2px 2px 10px #999;">
+          <div v-if="mapMessagePad" style="width: 300px; background: #dfdfdf; position: absolute; top: 20px; right: 20px;">
             <pre style="margin: 2px; white-space: pre-wrap; word-wrap: break-word;">{{ mapMessagePad }}</pre>
           </div>
 
@@ -135,7 +135,7 @@
                 {{ scope.row.trace_pos['lng'] }}
               </template>
             </el-table-column>
-            <el-table-column label="纬度">
+            <el-table-column label="维度">
               <template slot-scope="scope">
                 {{ scope.row.trace_pos['lat'] }}
               </template>
@@ -171,7 +171,7 @@
 </template>
 
 <script>
-import { BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker, BmPointCollection, BmPolyline } from 'vue-baidu-map'
+import { BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker, BmPointCollection } from 'vue-baidu-map'
 import { translateState } from '../../utils/translate'
 import { datePrototypeFormat } from '../../utils/dateFormat'
 import QRCode from 'qrcode'
@@ -186,8 +186,7 @@ export default {
     BmAutoComplete,
     BmLocalSearch,
     BmMarker,
-    BmPointCollection,
-    BmPolyline
+    BmPointCollection
   },
   data: function() {
     return {
@@ -273,7 +272,6 @@ export default {
                   trace.trace_pos = JSON.parse(trace.trace_pos)
                   this.tracesPos.push(trace.trace_pos)
                 }
-                console.log(this.tracesPos)
                 if (this.traces.length > 0) {
                   this.startPos = [this.traces[0].trace_pos]
                 }

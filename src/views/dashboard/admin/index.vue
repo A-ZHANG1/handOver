@@ -6,7 +6,9 @@
    :position 设置在data return 中监听改变
 -->
 <template>
-  <div style="padding-top:50px; border:1px solid LightGrey;width:980px;">
+  <div style="padding-top:50px; border:0px solid LightGrey;width:980px;">
+    <!-- {{current_time}}
+    {{end_time}} -->
     <el-form label-width="120px" v-model="showMapComponent">
 
 <!-- 动态添加商品和位置的表格 -->
@@ -14,7 +16,7 @@
   <!-- 商品名 --> 
       <!-- :label="'商品名' + index" -->
       <!-- :key="domain.key" -->
-  <el-form-item><div style="font-size:26px;color:gray;">物品信息</div></el-form-item>
+  <el-form-item><div style="font-size:26px;color:gray;">代购任务</div></el-form-item>
   <el-form-item
     v-for="(domain, index) in dynamicValidateForm.domains"
     :key="domain.key"
@@ -22,11 +24,11 @@
     style="width: 900px;"
   >
   <el-row :gutter="20">
-  <el-col :span="8" :gutter="10">
-    <el-input v-model="domain.value" placeholder="品名"></el-input>
+  <el-col :span="6">
+    <el-input v-model="domain.value" placeholder="品名" label="物品信息"></el-input>
   </el-col>
   <el-col :span="4">
-    <el-input v-model.number="domain.price" placeholder="预估价格"></el-input>
+    <el-input v-model.number="domain.price" placeholder="预估价格" label="物品信息"></el-input>
   </el-col>
   <el-col :span="10">
     <el-input v-model="domain.des" placeholder="商品描述"></el-input>
@@ -35,29 +37,39 @@
     <el-input-number v-model="domain.weight" placeholder="重量"></el-input-number>
   </el-col> -->
   <el-col :span="2">
-    <el-button @click="removeDomain(domain)" icon="el-icon-minus" type="danger" circle></el-button>
+      <el-button v-if="index!=0" @click="removeDomain(domain)" icon="el-icon-minus" type="danger" circle plain></el-button>
   </el-col>
-  </el-row>
-
-  </el-form-item>
- 
-<!-- 新增按键 -->
-  <el-form-item>
-    <el-col :span="10" :offset="10">
-      <el-button @click="addDomain" icon="el-icon-plus" type="success" circle></el-button>
+  <el-col :span="2">
+      <el-button v-if="index===0" @click="addDomain" icon="el-icon-plus" type="success" circle plain></el-button>
     </el-col>
+  </el-row>
   </el-form-item>
 
 <!-- 显示总价 -->
 <el-form-item>
   <el-row>
-    <el-col :offset="20">
+    <el-col :offset="0">
     <!-- <div v-for="(domain, index) in dynamicValidateForm.domains" :key="domain.key">{{domain.price}}</div> -->
-      <div  style="font-size:16px;color:gray;align:right">预估总价:{{itemPriceSum()}}</div>
+      <div  style="font-size:16px;color:gray;align:left">预估总价:{{itemPriceSum()}}</div>
     </el-col>
   </el-row>
 </el-form-item>
 </el-form>
+
+<!-- 系统推荐悬赏金 -->
+  <el-form-item label="悬赏金" placeholder="系统预估费用" style="width: 900px;">
+        <el-row>
+        <el-col :span="4">
+          <el-input v-model.number="form.reward"/>
+        </el-col>
+        <el-col :span="2" :offset="1">
+          <el-button @click="$showReward()">推荐</el-button>
+        </el-col>
+        </el-row>
+        <el-row>
+          <span v-if="rewardShow">系统推荐悬赏金：￥ {{getOwnerInfo()}}</span>
+        </el-row>
+      </el-form-item>
 
 <!-- 选择收件人 -->
       <el-form-item label="收件人"  required="true">           
@@ -65,7 +77,7 @@
         <el-collapse :according=true>
           <el-collapse-item>
           <!-- <el-collapse-item :title="settedReceiver.receiver_name"> -->
-            <template slot="title"><div style="font-size:28px;color:gray;">{{settedReceiver.receiver_name}} @ {{settedReceiver.receiver_address.title}}</div>
+            <template slot="title"><div style="font-size:16px;color:gray;">{{settedReceiver.receiver_name}} @ {{settedReceiver.receiver_address.title}}</div>
             </template>
             <!-- v-for展开常用收件人 -->
             <el-row>
@@ -77,32 +89,60 @@
               <el-table-column prop="receiver_phone" width="110"/>
                 <el-table-column>
                   <template scope="scope">
-                    <el-button type="info" icon="el-icon-check" circle @click="setReceiver(scope.row.receiver_name)"></el-button>
+
+                    <el-button :type="settedReceiver.receiver_name===scope.row.receiver_name?'success':''"  icon="el-icon-check" circle @click="setReceiver(scope.row.receiver_name)"></el-button>
+                    <!-- <el-button v-else type="info"  icon="el-icon-check" circle @click="setReceiver(scope.row.receiver_name)"></el-button> -->
                   </template>
                 </el-table-column> 
             </el-table>
             </el-col>
             </el-row>
             <el-row>
-            <el-col :span="10" :offset="10" >
-            <!-- <el-card> -->
-              <el-button type="success" @click="showDialog()" icon="el-icon-circle-plus-outline" size="medium" style="padding-top:5px;">新建收件人</el-button>
-            <!-- </el-card>   -->
-            </el-col>    
+            <el-col >
+              <el-button @click="showDialog()" icon="el-icon-circle-plus-outline" plain>新建</el-button>
+            </el-col>              
             </el-row>  
           </el-collapse-item>
-        </el-collapse>
+        </el-collapse> 
         </div>
-      </el-form-item>   
+      </el-form-item> 
+
+      <el-form-item label="任务时间" placeholder="任务开始时间">
+        <el-row>
+          <el-col :span="3">
+        <el-date-picker
+          v-model="form.start_time"
+          type="datetime"
+          placeholder="选择日期时间"
+          align="right"
+          :picker-options="pickerOptions1">
+        </el-date-picker>
+</el-col>
+      <el-col :span="3" :offset="4">
+        <el-date-picker
+          v-model="form.end_time"
+          type="datetime"
+          placeholder="选择日期时间"
+          align="right"
+          :picker-options="pickerOptions1">
+        </el-date-picker>
+      </el-col>
+        </el-row>
+      </el-form-item>
+      <!-- <el-form-item label="任务截止时间" placeholder="任务截止时间"> -->
+        
+      <!-- </el-form-item> -->
+
       <el-form-item label="备注">
         <el-col :span=23>
           <el-input v-model="form.note" type="textarea"/>
       </el-col>
       </el-form-item>
+
       <el-form-item>
         <el-button type="primary" @click="onSubmit">发布</el-button>
-        <!-- <el-button @click="onCancel">取消</el-button> -->
       </el-form-item>
+
     </el-form>
 
 <!-- 添加收件人 弹窗-->
@@ -170,7 +210,38 @@
     },
     data: function () {
       return {
+        pickerOptions1: {
+          shortcuts: [
+            {
+              text: '现在',
+              onClick(picker) {
+                picker.$emit('pick', new Date())
+              }
+            }, {
+              text: '明天',
+              onClick(picker) {
+                picker.$emit('pick', new Date() + 3600 * 1000 * 24)
+              }
+            }, {
+              text: '后天',
+              onClick(picker) {
+                const date = new Date()
+                date.setTime(date.getTime() + 3600 * 1000 * 24 * 2)
+                picker.$emit('pick', date)
+              }
+            }, {
+              text: '一周后',
+              onClick(picker) {
+                const date = new Date()
+                date.setTime(date.getTime() + 3600 * 1000 * 24 * 7)
+                picker.$emit('pick', date)
+              }
+            }]
+        },
+        rewardShow:false,
+        recommandReward:0,
         current_time:moment().format('YYYY-MM-DD HH:mm:ss'),
+        end_time:moment().add(7, 'hours').format('YYYY-MM-DD HH:mm:ss'),
         ownerUID:getUserId(),
         showMapComponent: this.value,
         keyword: '',
@@ -183,7 +254,9 @@
         zoom: 15,       
         form: {
             priceSum:0,  
-            note: ''
+            note: '',
+            start_time: '',
+            end_time: ''
          },
          dynamicValidateForm: {
           domains: [{
@@ -261,8 +334,15 @@
           key: Date.now()
         });
       },
+      //强制重新生成DOM
+      $showReward(){
+        this.rewardShow=true
+      },
       setPositions(){
           this.position=[{lng: 121.443, lat:31.032},{lng: 121.447, lat:31.032433}]
+      },
+      showReward(){
+        return this.recommandReward
       },
       /***
        * 地图点击事件。
@@ -365,7 +445,6 @@
               type: 'success',
               duration: 2000
             })
-
       },
       /***
        * 发布人位置,代商品位置
@@ -375,14 +454,22 @@
         this.$axios.get(url).then(res=>{
           for(var i in res.data.User){
             // console.log(res.data)
-            let owner=res.data.User[i]            
+            let owner=res.data.User[i]    
             if(owner.id==this.ownerUID){
-              this.itemPosition=owner.current_pos
-               console.log(owner)
+              // console.log("if entered")          
+              this.itemPosition=JSON.parse(owner.current_pos)
+              this.ownerName=owner.user_name
             }
           }
+               console.log("itemPosition:")
+               console.log(this.itemPosition) 
+               console.log(this.itemPosition.lat)  
+               this.recommandReward=10+1.8*Math.sqrt(Math.pow(this.settedReceiver.receiver_address.lat-this.itemPosition.lat,2),Math.pow(this.settedReceiver.receiver_address.lng-this.itemPosition.lng,2)) 
+               console.log(this.recommandReward)  
         })
-      // console.log(this.itemPosition)     
+        // console.log("current position:")
+        // console.log(this.itemPosition)  
+        return this.recommandReward.toFixed(2)                   
       },      
       theReplacer(key, value) {
         if(key=== "total_price"){return +value}
@@ -415,10 +502,11 @@
               item_des:itemList[item].des,
               item_state:"off",
               item_price:itemList[item].price,
-              item_image:"nan",
+              item_image:"",
               // _task_uid:"nan"
               _task_uid:response.data.id
             }
+            // console.log(this.itemList[0].item_address)
             console.log(JSON.stringify(completeItem,this.itemReplacer))
             this.$axios({
                 url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Item', 
@@ -447,22 +535,23 @@
                   current_state:"released",
                   task_type:"purchase",
                   task_des:this.form.note,
-                  task_comment:"nan",
+                  task_comment:"",
                   _owner_uid:getUserId(),
-                  _receiver_uid:"nan",
-                  _postman_uid:"nan",
-                  start_time:this.current_time,
-                  end_time:"nan",
-                  owner_name:"nan",
-                  postman_name:"nan",
-                  postman_phone:"nan",
+                  _receiver_uid:settedReceiver.user_uid,
+                  _postman_uid:"",
+                  // start_time:this.current_time,
+                  // end_time:this.end_time,
+                  start_time:  moment(this.form.start_time).format('YYYY-MM-DD HH:mm:ss'),
+                  end_time: moment(this.form.end_time).format('YYYY-MM-DD HH:mm:ss'),
+                  owner_name:this.ownerName,
+                  postman_name:"",
+                  postman_phone:"",
                   receiver_name:this.settedReceiver.receiver_name,
                   receiver_address:JSON.stringify(this.settedReceiver.receiver_address),
                   receiver_phone:this.settedReceiver.receiver_phone,
-                  payment_state:"nan"
+                  payment_state:""
                 }
-
-     console.log(JSON.stringify(newTask,this.theReplacer));         
+        console.log(JSON.stringify(newTask,this.theReplacer));         
         this.$axios(
               {
                 url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task', 
