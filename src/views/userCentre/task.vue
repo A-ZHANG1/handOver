@@ -1,7 +1,7 @@
 <template>
   <div style="padding-top:50px; border:0px solid red">
     <Modal>
-      <el-tabs type="border-card">
+      <el-tabs v-if="myTask" type="border-card">
         <el-tab-pane label="基本信息">
           <baidu-map v-bind:style="mapStyle"
                      :center="center"
