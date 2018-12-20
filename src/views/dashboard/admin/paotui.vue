@@ -26,27 +26,27 @@
           </el-input>
         </el-col>
       </el-row>
-      </el-form-item>    
+      </el-form-item>
 
-      <el-form-item style="width: 900px;">         
+      <el-form-item style="width: 900px;">
         <el-col :span="24">
           <el-input  type="textarea" v-model="item.des" placeholder="简要描述"></el-input>
       </el-col>
       </el-form-item>
-  
+
 <!-- 取件地址 -->
       <el-form-item style="width: 900px;">
         <el-col :span=24>
       <baidu-map v-bind:style="mapStyle" class="bm-view" ak="K73Dbc6A1dKd3dLI0ikN5p83u5rKnGmy"
-      :center="center" 
-      :zoom="zoom" 
-      :scroll-wheel-zoom="true" 
+      :center="center"
+      :zoom="zoom"
+      :scroll-wheel-zoom="true"
       @click="setItemAddress"
-      @moving="syncCenterAndZoom" 
-      @moveend="syncCenterAndZoom" 
+      @moving="syncCenterAndZoom"
+      @moveend="syncCenterAndZoom"
       @zoomend="syncCenterAndZoom">
         <bm-view style="width: 100%; height:500px;"></bm-view>
-        
+
         <bm-control :offset="{width: '10px', height: '10px'}">
           <bm-auto-complete v-model="keyword" :sugStyle="{zIndex: 999999}">
             <input type="text" placeholder="请填写取件地址，如：闵行交大学生西67舍" class="serachinput">
@@ -57,7 +57,7 @@
         </bm-marker>
       </baidu-map>
     </el-col>
-    
+
   </el-form-item>
 
 <!-- 新建物品 -->
@@ -74,7 +74,7 @@
               <el-table-column prop="item_name" label="名称" width="180"/>
               <el-table-column prop="item_address.title" label="地址" width="380"/>
               <el-table-column prop="senderPhoneNum" label="发件人电话" width="180"/>
-      </el-table>   
+      </el-table>
    </el-form-item>
    <!-- <el-form-item>
      <el-button @click="getPickUpOrder">顺序</el-button>
@@ -96,17 +96,17 @@
   </el-form-item>
 
 <!-- 选择收件人 -->
-      <el-form-item label="收件人"  required="true">    
-      
+      <el-form-item label="收件人"  required="true">
+
       <el-row>
 
         <el-col >
             <el-button @click="showDialog()" icon="el-icon-circle-plus-outline" plain type="success">新建</el-button>
-        </el-col>              
-      
+        </el-col>
+
       <el-col>
-        
-      <div style=" border:0px solid LightGrey;width:900px;margin:15px">      
+
+      <div style=" border:0px solid LightGrey;width:900px;margin:15px">
         <el-collapse :according=true>
           <el-collapse-item>
           <!-- {{settedReceiver.receiver_name}} @ {{settedReceiver.receiver_address.title}} -->
@@ -125,19 +125,19 @@
                   <template scope="scope">
                     <el-button :type="settedReceiver.receiver_name===scope.row.receiver_name?'success':''"  icon="el-icon-check" circle @click="setReceiver(scope.row.receiver_name)"></el-button>
                   </template>
-              </el-table-column> 
+              </el-table-column>
             </el-table>
               </template>
             </el-col>
             </el-row>
-              
+
           </el-collapse-item>
         </el-collapse>
         </div>
       </el-col>
-      </el-row>  
+      </el-row>
 
-      </el-form-item> 
+      </el-form-item>
       <!-- 开始时间和结束时间 -->
       <el-form-item label="预约时间">
       <el-row>
@@ -161,7 +161,7 @@
       </el-col>
       </el-row>
       </el-form-item>
-     
+
       <el-form-item label="备注" style="width: 900px;">
         <el-col :span=24>
           <el-input v-model="form.note" type="textarea" placeholder="特殊要求"/>
@@ -180,19 +180,19 @@
       <el-form ref="dataForm"  :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
         <!-- {{temp.receiver_name}}{{temp.receiver_address}}{{temp.receiver_tel}} -->
         <el-form-item label="姓名">
-            <el-input v-model="temp.receiver_name"/>          
+            <el-input v-model="temp.receiver_name"/>
         </el-form-item>
         <el-form-item label="地址">
           <baidu-map v-bind:style="mapStyle" class="bm-view" ak="K73Dbc6A1dKd3dLI0ikN5p83u5rKnGmy"
-      :center="center" 
-      :zoom="zoom" 
-      :scroll-wheel-zoom="true" 
+      :center="center"
+      :zoom="zoom"
+      :scroll-wheel-zoom="true"
       @click="setReceiverAddress"
-      @moving="syncCenterAndZoom" 
-      @moveend="syncCenterAndZoom" 
+      @moving="syncCenterAndZoom"
+      @moveend="syncCenterAndZoom"
       @zoomend="syncCenterAndZoom">
         <bm-view style="width: 100%; height:500px;"></bm-view>
-        
+
         <bm-control :offset="{width: '10px', height: '10px'}">
           <!-- v-model="temp.receiver_address.title" -->
           <bm-auto-complete v-model="keyword" :sugStyle="{zIndex: 999999}">
@@ -205,10 +205,10 @@
       </baidu-map>
         </el-form-item>
         <el-form-item label="详细地址">
-            <el-input placeholder="如：5310室" v-model="temp.receiver_address.detail"/>          
+            <el-input placeholder="如：5310室" v-model="temp.receiver_address.detail"/>
         </el-form-item>
         <el-form-item label="电话">
-            <el-input v-model="temp.receiver_phone"/>          
+            <el-input v-model="temp.receiver_phone"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -216,7 +216,7 @@
         <el-button type="primary" @click="createReceiver">确认</el-button>
       </div>
     </el-dialog>
-  </div>  
+  </div>
 </template>
 <script>
   import {BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker,BmPointCollection} from 'vue-baidu-map'
@@ -238,7 +238,34 @@
     },
     data: function () {
       return {
-        
+        pickerOptions1: {
+          shortcuts: [
+            {
+              text: '现在',
+              onClick(picker) {
+                picker.$emit('pick', new Date())
+              }
+            }, {
+              text: '明天',
+              onClick(picker) {
+                picker.$emit('pick', new Date() + 3600 * 1000 * 24)
+              }
+            }, {
+              text: '后天',
+              onClick(picker) {
+                const date = new Date()
+                date.setTime(date.getTime() + 3600 * 1000 * 24 * 2)
+                picker.$emit('pick', date)
+              }
+            }, {
+              text: '一周后',
+              onClick(picker) {
+                const date = new Date()
+                date.setTime(date.getTime() + 3600 * 1000 * 24 * 7)
+                picker.$emit('pick', date)
+              }
+            }]
+        },
         rewardShow:false,
         testText: {},//遗传算法确定的取件顺序
         current_time:moment().format('YYYY-MM-DD HH:mm:ss'),
@@ -254,8 +281,8 @@
         },
         center: {lng: 121.443, lat:31.032},
         zoom: 15,
-        form: { 
-            reward:0,          
+        form: {
+            reward:0,
             note: '',
             start_time: '',
             end_time: ''
@@ -270,7 +297,7 @@
               lat:'',
               detail:''
             }
-         },        
+         },
         itemList:[],
         orderedItemList:[],
          temp:{
@@ -288,7 +315,7 @@
          settedReceiver:[],
          dialogFormVisible: false,
          pickUp_address:[]
-      }      
+      }
     },
     watch: {
       value: function (currentValue) {
@@ -307,7 +334,7 @@
     },
     mounted(){
       this.getReceivers()
-      this.getOwnerInfo()  
+      this.getOwnerInfo()
     },
     methods: {
       setPositions(){
@@ -318,7 +345,7 @@
        */
       // getClickInfo (e) {
       //   this.center.lng = e.point.lng
-      //   this.center.lat = e.point.lat  
+      //   this.center.lat = e.point.lat
       // },
       /***
        * 弹窗地图点击事件。
@@ -346,16 +373,16 @@
         this.$axios.get(url).then(res=>{
           for(var i in res.data.User){
             let owner=res.data.User[i]
-            
+
             if(owner.id==this.ownerUID){
               this.senderName=owner.user_name
-              this.senderPhoneNum=owner.phone_num 
+              this.senderPhoneNum=owner.phone_num
                console.log(owner)
             }
           }
         })
       // console.log(this.itemPosition)
-      
+
       },
       /***
       *  查看常用收件人
@@ -365,11 +392,11 @@
         let receiverOfCurrentOwner=[]
         this.$axios.get(url).then(res => {
           for (var i in res.data.Receiver) {
-            let receiver = res.data.Receiver[i] 
+            let receiver = res.data.Receiver[i]
             if(receiver.user_uid==this.ownerUID){
               receiver.receiver_address = JSON.parse(receiver.receiver_address)
               receiverOfCurrentOwner.unshift(receiver)
-            }        
+            }
           }
           this.receiverData=receiverOfCurrentOwner
            this.settedReceiver=this.receiverData[0]
@@ -380,9 +407,9 @@
        */
       setReceiver(receiverName) {
         for(var i in this.receiverData){
-          if(this.receiverData[i].receiver_name==receiverName){ 
+          if(this.receiverData[i].receiver_name==receiverName){
             this.settedReceiver=this.receiverData[i]
-          }        
+          }
         }
       },
       /***
@@ -409,7 +436,7 @@
         this.receiverData.unshift(this.temp)
         this.$axios(
               {
-                url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Receiver', 
+                url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Receiver',
                 method:"post",
                 data:JSON.stringify(newReceiver),
                 headers:{
@@ -448,7 +475,7 @@
               item_price:0,
               item_image:"",
               _task_uid:""
-            }           
+            }
         this.itemList.unshift(currentItem);
 // console.log(currentItem)
         //清空输入框
@@ -478,7 +505,7 @@ console.log(this.itemList)
       /***
        * 遗传算法确定取件顺序,及在此基础上确定悬赏金
        */
-    getPickUpOrder() {  
+    getPickUpOrder() {
 
       const _traceList = []
       const _distanceTable = []
@@ -487,7 +514,7 @@ console.log(this.itemList)
       let _endPoint = null
       const _endPointDistance = []
       _startPoint={lat:this.itemList[0].item_address.lat,lon:this.itemList[0].item_address.lng}
-    
+
       _endPoint = { lat: this.settedReceiver.receiver_address.lat, lon: this.settedReceiver.receiver_address.lng }
       // _endPoint = { lat: 6, lon: 9 }
       for(let i = 1; i < this.itemList.length; i++){
@@ -506,7 +533,7 @@ console.log(this.itemList)
         }
       }
       this.testText = traceRecommend(_traceList, _startPointDistance, _endPointDistance, _distanceTable)
-      
+
       for(var i in this.testText.trace){
           this.orderedItemList.unshift(this.itemList[this.testText.trace[i]])
        }
@@ -521,9 +548,9 @@ console.log(this.itemList)
             distance=distance+Math.sqrt(Math.pow(this.orderedItemList[k].item_address.lat -this.orderedItemList[k-1].item_address.lat, 2) + Math.pow(this.orderedItemList[k].item_address.lng - this.orderedItemList[k-1].item_address.lng, 2))
       }
       console.log(distance)
-      return (10+1.8*distance).toFixed(2) 
+      return (10+1.8*distance).toFixed(2)
      },
-     /*  
+     /*
       *task JSONStringify
       */
       theReplacer(key, value) {
@@ -546,18 +573,18 @@ console.log(this.itemList)
             item_price: this.orderedItemList[0].price,
             item_image: '',
             _task_uid: response.data.id
-          }       
+          }
           requestList.unshift(this.$axios({
             url: 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Item',
             method: 'post',
             data: JSON.stringify(completeItem, this.itemReplacer),
-            headers: {'Content-Type': 'application/json'}      
+            headers: {'Content-Type': 'application/json'}
             })
           )}
-          this.$axios.all(requestList).then(res => {           
-              console.log('item submitted') 
+          this.$axios.all(requestList).then(res => {
+              console.log('item submitted')
           }).catch(function(error) {
-              console.log(error)})  
+              console.log(error)})
       },
       /***
        * 表单提交事件
@@ -585,10 +612,10 @@ console.log(this.itemList)
                   payment_state:""
                 }
 
-     console.log(JSON.stringify(newTask,this.theReplacer));           
+     console.log(JSON.stringify(newTask,this.theReplacer));
         this.$axios(
               {
-                url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task', 
+                url:'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Task',
                 method:"post",
                 data:JSON.stringify(newTask,this.theReplacer),
                 headers:{
@@ -597,7 +624,7 @@ console.log(this.itemList)
               })
               .then(res=> {
                 console.log("Task posted");
-                this.submitItem(res)             
+                this.submitItem(res)
             })
             .catch(function (error) {
               console.log(error);
@@ -606,7 +633,7 @@ console.log(this.itemList)
     }
   }
 </script>
- 
+
 <style scoped>
 .serachinput{
   width: 400px;
