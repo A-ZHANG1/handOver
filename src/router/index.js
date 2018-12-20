@@ -34,18 +34,6 @@ export const constantRouterMap = [
   { path: '/404', component: () => import('@/views/404'), hidden: true },
 
   {
-    path: '/',
-    component: Layout,
-    redirect: '/dashboard',
-    name: 'Dashboard',
-    children: [{
-      path: 'dashboard',
-      component: () => import('@/views/dashboard/index'),
-      meta: { title: '代购', icon: 'shopping', roles: ['admin', 'editor'] }
-    }]
-  },
-
-  {
     path: '/delivery',
     component: Layout,
     redirect: '/delivery',
@@ -54,6 +42,18 @@ export const constantRouterMap = [
       path: 'delivery',
       component: () => import('@/views/dashboard/admin/paotui'),
       meta: { title: '取送件', icon: 'lock', roles: ['admin', 'editor'] }
+    }]
+  },
+
+  {
+    path: '/',
+    component: Layout,
+    redirect: '/dashboard',
+    name: 'Dashboard',
+    children: [{
+      path: 'dashboard',
+      component: () => import('@/views/dashboard/index'),
+      meta: { title: '代购', icon: 'shopping', roles: ['admin', 'editor'] }
     }]
   },
   // {

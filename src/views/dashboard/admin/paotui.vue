@@ -14,15 +14,31 @@
 <!-- 添加待取件物品 -->
    <el-form-item><div style="font-size:26px;color:gray;">取送件</div></el-form-item>
    <!-- 设置el-form-item style=width:可以不自适应页面宽度-->
+   <div style="margin:0px 0px 20px 120px;padding:0;width:790px;height:1px;background-color:lightGrey;overflow:hidden;"></div>
+   <el-form-item label="快件信息">
       <el-form-item style="width: 900px;">
       <el-row>
-        <el-col :span="16">
+        <el-col :span="14">
           <el-input v-model="item.productName" placeholder="请填写物品名称">
           </el-input>
         </el-col>
-        <el-col :offset="2" :span="6">
+        <el-col :offset="1" :span="6">
           <el-input  v-model="item.productSize" placeholder="预估重量">
             <template slot="append">kg</template>
+          </el-input>
+        </el-col>
+      </el-row>
+      </el-form-item>
+    </el-form-item>
+
+    <el-form-item style="width: 900px;">
+      <el-row>
+        <el-col :span="16">
+          <el-input v-model="item.senderName" placeholder="联系人姓名">
+          </el-input>
+        </el-col>
+        <el-col :offset="1" :span="6">
+          <el-input  v-model="item.senderPhoneNum" placeholder="联系人电话">
           </el-input>
         </el-col>
       </el-row>
@@ -69,16 +85,53 @@
 
 <!-- 显示当前物品信息 -->
    <el-form-item label="已添加物品">
-     <!-- <div style="font-size:26px;color:gray;">已添加物品</div> -->
       <el-table :data="itemList" highlight-current-row style="width:900px">
-              <el-table-column prop="item_name" label="名称" width="180"/>
-              <el-table-column prop="item_address.title" label="地址" width="380"/>
-              <el-table-column prop="senderPhoneNum" label="发件人电话" width="180"/>
+              <el-table-column prop="item_name" label="名称" width="100"/>
+              <el-table-column prop="item_address.title" label="取件地址" width="380"/>
+              <el-table-column prop="senderName" label="联系人" width="80"/>
+              <el-table-column prop="senderPhoneNum" width="180"/>
       </el-table>
    </el-form-item>
    <!-- <el-form-item>
      <el-button @click="getPickUpOrder">顺序</el-button>
    </el-form-item> -->
+
+
+<!-- 选择收件人 -->
+      <el-form-item label="收件人"  required="true">           
+      <div style="padding-button:5px; border:0px solid LightGrey;width:820px;">
+        <el-collapse :according=true>
+          <el-collapse-item>
+          <!-- <el-collapse-item :title="settedReceiver.receiver_name"> -->
+            <template slot="title"><div style="font-size:16px;color:gray;">{{settedReceiver.receiver_name}} @ {{settedReceiver.receiver_address.title}}</div>
+            </template>
+            <!-- v-for展开常用收件人 -->
+            <el-row>
+            <el-col>
+            <el-table :data="receiverData" highlight-current-row>
+              <el-table-column prop="receiver_name" width="80"/>
+              <el-table-column prop="receiver_address.title" width="380"/>
+              <el-table-column prop="receiver_address.detail" width="80"/>
+              <el-table-column prop="receiver_phone" width="110"/>
+                <el-table-column>
+                  <template scope="scope">
+
+                    <el-button :type="settedReceiver.receiver_name===scope.row.receiver_name?'success':''"  icon="el-icon-check" circle @click="setReceiver(scope.row.receiver_name)"></el-button>
+                    <!-- <el-button v-else type="info"  icon="el-icon-check" circle @click="setReceiver(scope.row.receiver_name)"></el-button> -->
+                  </template>
+                </el-table-column> 
+            </el-table>
+            </el-col>
+            </el-row>
+            <el-row>
+            <el-col >
+              <el-button @click="showDialog()" icon="el-icon-circle-plus-outline" plain>新建</el-button>
+            </el-col>              
+            </el-row>  
+          </el-collapse-item>
+        </el-collapse> 
+        </div>
+      </el-form-item> 
 
 <!-- 任务悬赏金设置 -->
   <el-form-item label="悬赏金" placeholder="系统预估费用" style="width: 900px;">
@@ -95,50 +148,7 @@
         </el-row>
   </el-form-item>
 
-<!-- 选择收件人 -->
-      <el-form-item label="收件人"  required="true">
-
-      <el-row>
-
-        <el-col >
-            <el-button @click="showDialog()" icon="el-icon-circle-plus-outline" plain type="success">新建</el-button>
-        </el-col>
-
-      <el-col>
-
-      <div style=" border:0px solid LightGrey;width:900px;margin:15px">
-        <el-collapse :according=true>
-          <el-collapse-item>
-          <!-- {{settedReceiver.receiver_name}} @ {{settedReceiver.receiver_address.title}} -->
-            <template slot="title"><div style="font-size:16px;color:lightGray;">常用收件人列表</div>
-            </template>
-            <!-- v-for展开常用收件人 -->
-            <el-row>
-            <el-col>
-              <template>
-            <el-table :data="receiverData" highlight-current-row>
-              <el-table-column prop="receiver_name" width="80"></el-table-column>
-              <el-table-column prop="receiver_address.title" width="380"></el-table-column>
-              <el-table-column prop="receiver_address.detail" width="80"></el-table-column>
-              <el-table-column prop="receiver_phone" width="110"></el-table-column>
-              <el-table-column>
-                  <template scope="scope">
-                    <el-button :type="settedReceiver.receiver_name===scope.row.receiver_name?'success':''"  icon="el-icon-check" circle @click="setReceiver(scope.row.receiver_name)"></el-button>
-                  </template>
-              </el-table-column>
-            </el-table>
-              </template>
-            </el-col>
-            </el-row>
-
-          </el-collapse-item>
-        </el-collapse>
-        </div>
-      </el-col>
-      </el-row>
-
-      </el-form-item>
-      <!-- 开始时间和结束时间 -->
+<!-- 开始时间和结束时间 -->
       <el-form-item label="预约时间">
       <el-row>
       <el-col :span="3">
@@ -270,8 +280,6 @@
         testText: {},//遗传算法确定的取件顺序
         current_time:moment().format('YYYY-MM-DD HH:mm:ss'),
         ownerUID:getUserId(),
-        senderName:null,
-        senderPhoneNum:null,
         showMapComponent: this.value,
         keyword: '',
         // receiverAddressKeyword: '学生西67舍',
@@ -296,7 +304,9 @@
               lng:'',
               lat:'',
               detail:''
-            }
+            },
+            senderName:null,
+            senderPhoneNum:null,
          },
         itemList:[],
         orderedItemList:[],
@@ -474,10 +484,12 @@
               item_state:"off",
               item_price:0,
               item_image:"",
-              _task_uid:""
+              _task_uid:"",
+              senderName:this.item.senderName,
+              senderPhoneNum:this.item.senderPhoneNum
             }
         this.itemList.unshift(currentItem);
-// console.log(currentItem)
+
         //清空输入框
         this.item.productName=''
         this.item.productSize=''
@@ -486,7 +498,9 @@
         this.item.item_address.lng=''
         this.item.item_address.lat=''
         this.item.item_address.detail=''
-console.log(this.itemList)
+        this.item.senderPhoneNum=''
+        this.item.senderName=''
+
       },
         //强制重新生成DOM
       $showReward(){
@@ -517,7 +531,7 @@ console.log(this.itemList)
 
       _endPoint = { lat: this.settedReceiver.receiver_address.lat, lon: this.settedReceiver.receiver_address.lng }
       // _endPoint = { lat: 6, lon: 9 }
-      for(let i = 1; i < this.itemList.length; i++){
+      for(let i = 0; i < this.itemList.length; i++){
         _traceList.push({lat:this.itemList[i].item_address.lat,lon:this.itemList[i].item_address.lng})
       }
       for (let i = 0; i < _traceList.length; i++) {
@@ -559,6 +573,7 @@ console.log(this.itemList)
         else{return value}
          // return key === "total_price" ? +value : value;
       },
+
       /**
        * 发布物品
        */
@@ -573,18 +588,27 @@ console.log(this.itemList)
             item_price: this.orderedItemList[0].price,
             item_image: '',
             _task_uid: response.data.id
-          }
-          requestList.unshift(this.$axios({
+            }
+          var newPromise=this.$axios({
             url: 'http://47.107.241.57:8080/Entity/U2b963dc3176f9/hand_pass/Item',
             method: 'post',
             data: JSON.stringify(completeItem, this.itemReplacer),
             headers: {'Content-Type': 'application/json'}
-            })
-          )}
-          this.$axios.all(requestList).then(res => {
-              console.log('item submitted')
-          }).catch(function(error) {
-              console.log(error)})
+          })
+          requestList.push(newPromise)
+          }
+          console.log("requestList:")
+          console.log(requestList)
+          this.$axios
+            .all(requestList)
+            //then中用spread或forEach
+            .then(responses => {
+                  responses.forEach(res => console.log('Success'))
+                  console.log('submitted all axios calls')
+              })
+            .catch(function(error) {
+              console.log(error)
+            })             
       },
       /***
        * 表单提交事件
