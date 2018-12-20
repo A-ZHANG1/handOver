@@ -3,8 +3,7 @@
     <Modal>
       <el-tabs v-if="myTask" type="border-card">
         <el-tab-pane label="基本信息">
-          <baidu-map v-if="traces.length > 0"
-                     v-bind:style="mapStyle"
+          <baidu-map v-bind:style="mapStyle"
                      :center="center"
                      :zoom="zoom"
                      :scroll-wheel-zoom="true"
