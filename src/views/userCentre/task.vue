@@ -171,7 +171,7 @@
 </template>
 
 <script>
-import { BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker, BmPointCollection } from 'vue-baidu-map'
+import { BaiduMap, BmControl, BmView, BmAutoComplete, BmLocalSearch, BmMarker, BmPointCollection, BmPolyline } from 'vue-baidu-map'
 import { translateState } from '../../utils/translate'
 import { datePrototypeFormat } from '../../utils/dateFormat'
 import QRCode from 'qrcode'
@@ -186,7 +186,8 @@ export default {
     BmAutoComplete,
     BmLocalSearch,
     BmMarker,
-    BmPointCollection
+    BmPointCollection,
+    BmPolyline
   },
   data: function() {
     return {
