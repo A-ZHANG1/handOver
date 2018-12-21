@@ -467,7 +467,7 @@
                console.log("itemPosition:")
                console.log(this.itemPosition) 
                console.log(this.itemPosition.lat)  
-               this.recommandReward=10+1.8*Math.sqrt(Math.pow(this.settedReceiver.receiver_address.lat-this.itemPosition.lat,2),Math.pow(this.settedReceiver.receiver_address.lng-this.itemPosition.lng,2)) 
+               this.recommandReward=10+1800*Math.sqrt(Math.pow(this.settedReceiver.receiver_address.lat-this.itemPosition.lat,2),Math.pow(this.settedReceiver.receiver_address.lng-this.itemPosition.lng,2)) 
                console.log(this.recommandReward)  
         })
         // console.log("current position:")

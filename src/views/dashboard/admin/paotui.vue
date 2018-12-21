@@ -8,39 +8,20 @@
 <template>
   <div style="padding-top:50px; border:1px solid lightGrey;width=980px;">
 
-   <!-- {{ JSON.stringify(testText) }} -->
 
     <el-form ref="item" :model="item" label-width="120px" v-model="showMapComponent">
 <!-- 添加待取件物品 -->
    <el-form-item><div style="font-size:26px;color:gray;">取送件</div></el-form-item>
    <!-- 设置el-form-item style=width:可以不自适应页面宽度-->
    <div style="margin:0px 0px 20px 120px;padding:0;width:790px;height:1px;background-color:lightGrey;overflow:hidden;"></div>
-   <el-form-item label="快件信息">
-      <el-form-item style="width: 900px;">
-      <el-row>
-        <el-col :span="14">
-          <el-input v-model="item.productName" placeholder="请填写物品名称">
-          </el-input>
-        </el-col>
-        <el-col :offset="1" :span="6">
-          <el-input  v-model="item.productSize" placeholder="预估重量">
-            <template slot="append">kg</template>
-          </el-input>
-        </el-col>
-      </el-row>
-      </el-form-item>
-    </el-form-item>
 
     <el-form-item style="width: 900px;">
       <el-row>
-        <el-col :span="16">
-          <el-input v-model="item.senderName" placeholder="联系人姓名">
+        <el-col>
+          <el-input v-model="item.productName" placeholder="请填写物品名称">
           </el-input>
         </el-col>
-        <el-col :offset="1" :span="6">
-          <el-input  v-model="item.senderPhoneNum" placeholder="联系人电话">
-          </el-input>
-        </el-col>
+       
       </el-row>
       </el-form-item>
 
@@ -77,24 +58,25 @@
   </el-form-item>
 
 <!-- 新建物品 -->
-  <el-form-item>
-  <el-col :offset="10">
-    <el-button type="success" @click="addItem">确认添加</el-button>
-  </el-col>
+  <el-form-item style="width: 900px;">
+     <el-col :span="16">
+      <el-input v-model="item.item_address.detail" placeholder="请填写详细地址">
+      </el-input>
+    </el-col>
+    <el-col :span="6" :offset="2" >
+      <el-button style="float: right;" type="success" @click="addItem">确认添加</el-button>
+    </el-col>
   </el-form-item>
 
 <!-- 显示当前物品信息 -->
-   <el-form-item label="已添加物品">
+   <el-form-item label="已添加物品" >
       <el-table :data="itemList" highlight-current-row style="width:900px">
               <el-table-column prop="item_name" label="名称" width="100"/>
-              <el-table-column prop="item_address.title" label="取件地址" width="380"/>
-              <el-table-column prop="senderName" label="联系人" width="80"/>
-              <el-table-column prop="senderPhoneNum" width="180"/>
+              <el-table-column prop="item_address.title" label="取件地址" width="200"/>
+              <el-table-column prop="item_address.detail" label="详细地址" width="200"/>            
+              <el-table-column prop="item_des" label="简要描述" width="400"/>
       </el-table>
    </el-form-item>
-   <!-- <el-form-item>
-     <el-button @click="getPickUpOrder">顺序</el-button>
-   </el-form-item> -->
 
 
 <!-- 选择收件人 -->
@@ -103,7 +85,7 @@
         <el-collapse :according=true>
           <el-collapse-item>
           <!-- <el-collapse-item :title="settedReceiver.receiver_name"> -->
-            <template slot="title"><div style="font-size:16px;color:gray;">{{settedReceiver.receiver_name}} @ {{settedReceiver.receiver_address.title}}</div>
+            <template slot="title"><div style="font-size:14px;paddingLeft:5px;color:gray;">{{settedReceiver.receiver_name}} @ {{settedReceiver.receiver_address.title}}</div>
             </template>
             <!-- v-for展开常用收件人 -->
             <el-row>
@@ -116,7 +98,7 @@
                 <el-table-column>
                   <template scope="scope">
 
-                    <el-button :type="settedReceiver.receiver_name===scope.row.receiver_name?'success':''"  icon="el-icon-check" circle @click="setReceiver(scope.row.receiver_name)"></el-button>
+                    <el-button size="mini" :type="settedReceiver.receiver_name===scope.row.receiver_name?'success':''"  icon="el-icon-check" circle @click="setReceiver(scope.row.receiver_name)"></el-button>
                     <!-- <el-button v-else type="info"  icon="el-icon-check" circle @click="setReceiver(scope.row.receiver_name)"></el-button> -->
                   </template>
                 </el-table-column> 
@@ -125,7 +107,7 @@
             </el-row>
             <el-row>
             <el-col >
-              <el-button @click="showDialog()" icon="el-icon-circle-plus-outline" plain>新建</el-button>
+              <el-button style="marginTop:10px" @click="showDialog()" icon="el-icon-circle-plus-outline" plain>新建</el-button>
             </el-col>              
             </el-row>  
           </el-collapse-item>
@@ -140,11 +122,14 @@
           <el-input v-model.number="form.reward"/>
         </el-col>
         <el-col :span="2" :offset="1">
+        <el-button @click="getPickUpOrder">顺序</el-button>
+        </el-col>
+        <el-col :span="2" :offset="1">
           <el-button @click="$showReward()">推荐</el-button>
         </el-col>
         </el-row>
         <el-row>
-          <span v-if="rewardShow">系统推荐悬赏金：￥ {{calculateReward()}}</span>
+          <span v-if="rewardShow">系统推荐悬赏金：￥ {{calculateReward}}距离 {{calculateDistance}} km</span>
         </el-row>
   </el-form-item>
 
@@ -478,7 +463,8 @@
               item_address:{
                 lng:this.item.item_address.lng,
                 lat:this.item.item_address.lat,
-                title:this.item.item_address.title
+                title:this.item.item_address.title,
+                detail:this.item.item_address.detail,
               },
               item_des:this.item.des,
               item_state:"off",
@@ -551,19 +537,12 @@
       for(var i in this.testText.trace){
           this.orderedItemList.unshift(this.itemList[this.testText.trace[i]])
        }
+
       },
       /*
       *计算费用
       ***/
-     calculateReward(){
-      // console.log(this.orderedItemList[0].item_address)
-      var distance=0
-      for(let k = 1; k < this.orderedItemList.length; k++){
-            distance=distance+Math.sqrt(Math.pow(this.orderedItemList[k].item_address.lat -this.orderedItemList[k-1].item_address.lat, 2) + Math.pow(this.orderedItemList[k].item_address.lng - this.orderedItemList[k-1].item_address.lng, 2))
-      }
-      console.log(distance)
-      return (10+1.8*distance).toFixed(2)
-     },
+    
      /*
       *task JSONStringify
       */
@@ -581,11 +560,11 @@
         var requestList=[]
         for (var item in this.orderedItemList) {
           let completeItem = {
-            item_name: this.orderedItemList[0].value,
-            item_address: this.itemPosition,
-            item_des: this.orderedItemList[0].des,
+            item_name: this.orderedItemList[item].productName,
+            item_address: JSON.stringify(this.orderedItemList[item].item_address),
+            item_des: this.orderedItemList[item].item_des||"",
             item_state: 'off',
-            item_price: this.orderedItemList[0].price,
+            item_price: this.orderedItemList[item].price||0,
             item_image: '',
             _task_uid: response.data.id
             }
@@ -615,6 +594,7 @@
        */
       onSubmit(){
         // let ownerUID=getUserId()
+        // this.$messae
         let newTask={
                   total_price:0,
                   express_fee:this.form.reward,
@@ -653,6 +633,20 @@
             .catch(function (error) {
               console.log(error);
             });
+      }
+    },
+    computed:{
+      calculateReward: function(){
+        // console.log(distance)
+        return (10+180*this.calculateDistance/110).toFixed(2)
+      },
+      calculateDistance: function(){
+        var distance=0
+        for(let k = 1; k < this.orderedItemList.length; k++){
+          console.log(this.orderedItemList[k])
+              distance=distance+Math.sqrt(Math.pow(this.orderedItemList[k].item_address.lat -this.orderedItemList[k-1].item_address.lat, 2) + Math.pow(this.orderedItemList[k].item_address.lng - this.orderedItemList[k-1].item_address.lng, 2))
+        }
+        return (distance*110).toFixed(2)
       }
     }
   }
