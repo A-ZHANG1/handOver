@@ -398,6 +398,8 @@
             // console.log(this.receiverData[i])
             this.settedReceiver=this.receiverData[i]
             // this.temp=receiver
+             console.log("setted receiver:")
+             console.log(this.settedReceiver)
           }        
         }
       },
@@ -538,7 +540,7 @@
                   task_des:this.form.note,
                   task_comment:"",
                   _owner_uid:getUserId(),
-                  _receiver_uid:settedReceiver.user_uid,
+                  _receiver_uid:this.settedReceiver.user_uid,
                   _postman_uid:"",
                   // start_time:this.current_time,
                   // end_time:this.end_time,
