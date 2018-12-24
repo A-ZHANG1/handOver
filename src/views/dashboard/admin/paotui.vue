@@ -594,7 +594,7 @@ export default {
       var requestList = []
       for (var item in this.orderedItemList) {
         const completeItem = {
-          item_name: this.orderedItemList[item].productName,
+          item_name: this.orderedItemList[item].item_name,
           item_address: JSON.stringify(this.orderedItemList[item].item_address),
           item_des: this.orderedItemList[item].item_des || '',
           item_state: 'off',

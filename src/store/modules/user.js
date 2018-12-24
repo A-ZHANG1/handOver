@@ -69,32 +69,40 @@ const user = {
               } else {
                 setToken('editor')
                 commit('SET_TOKEN', 'editor')
-              }  
+              }
             }
           }
           resolve()
         })
       }).catch(error => {
         reject(error)
-      })     
+      })
     },
 
     // 获取用户信息
     GetInfo({ commit, state }) {
       return new Promise((resolve, reject) => {
-        getInfo(state.token).then(response => {
-          const data = response.data
-          if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
-            commit('SET_ROLES', data.roles)
-          } else {
-            reject('getInfo: roles must be a non-null array !')
+        commit('SET_ROLES', ['editor', 'admin'])
+        commit('SET_NAME', '')
+        commit('SET_AVATAR', '')
+        resolve({
+          data: {
+            roles: ['editor', 'admin']
           }
-          commit('SET_NAME', data.name)
-          commit('SET_AVATAR', data.avatar)
-          resolve(response)
-        }).catch(error => {
-          reject(error)
         })
+        // getInfo(state.token).then(response => {
+        //   const data = response.data
+        //   if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
+        //     commit('SET_ROLES', data.roles)
+        //   } else {
+        //     reject('getInfo: roles must be a non-null array !')
+        //   }
+        //   commit('SET_NAME', data.name)
+        //   commit('SET_AVATAR', data.avatar)
+        //   resolve(response)
+        // }).catch(error => {
+        //   reject(error)
+        // })
       })
     },
 
